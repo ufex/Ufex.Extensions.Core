@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <RootNamespace>Ufex.FileTypes.Image</RootNamespace>
+    <AssemblyName>BMP</AssemblyName>
+    <BaseOutputPath>bin\</BaseOutputPath>
+    <AssemblyVersion>1.3.0.0</AssemblyVersion>
+  </PropertyGroup>
+ 
+  <ItemGroup>
+    <ProjectReference Include="..\..\ufex\UfexAPI\UfexAPI.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="System.Windows.Forms" />
+  </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="copy $(TargetDir)\BMP.dll $(SolutionDir)\x64\$(ConfigurationName)\modules\BMP.dll" />
+  </Target>
+
+</Project>
