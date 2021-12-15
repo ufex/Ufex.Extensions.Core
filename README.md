@@ -1,7 +1,7 @@
-﻿# ZIP Ufex Module
+﻿# GZIP Ufex Module
 
 ## References
 
-https://pkware.cachefly.net/webdocs/APPNOTE/APPNOTE-6.3.3.TXT
+http://www.zlib.org/rfc-gzip.html
 
 ## Test Files
