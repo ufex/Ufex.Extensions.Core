@@ -7,73 +7,120 @@ using Ufex.API;
 using Ufex.API.Tables;
 using Ufex.API.Tree;
 using Ufex.API.Format;
+using Ufex.API.Visual;
+using System.Reflection.Emit;
 
 namespace Ufex.FileTypes.ZIP;
 
-internal class SectionNode
+internal class SectionNode : TreeNode
 {
-	public virtual TreeNode Node 
+	public ZipFileReader.Section Section;
+
+	public virtual string Description
 	{
-		get
+		get { throw new Exception("Description must be implemented"); }
+	}
+
+	public override Ufex.API.Visual.Visual[] Visuals
+	{
+		get { return [ new DataGridVisual(TableData(), "Data") ]; }
+	}
+
+	public SectionNode(ZipFileReader.Section section, string text, TreeViewIcon imageIndex) 
+		: base(text, imageIndex, imageIndex)
+	{
+		Section = section;
+	}
+
+	public static SectionNode FromSection(ZipFileReader.Section section)
+	{
+		switch(section)
 		{
-			TreeNode tn = new TreeNode(TreeNodeLabel, TreeNodeIcon, TreeNodeIcon);
-			tn.Tag = this;
-			return tn;
+			case ZipFileReader.CompressedFile compFile:
+				return new CompressedFileNode(compFile);
+			case ZipFileReader.CentralDirectoryHeader centralDir:
+				return new CentralDirectoryHeaderNode(centralDir);
+			case ZipFileReader.EndOfCentralDirectoryRecord endRecord:
+				return new EndOfCentralDirectoryRecordNode(endRecord);
+			case ZipFileReader.LocalFileHeader localFileHeader:
+				return new LocalFileHeaderNode(localFileHeader);
+			case ZipFileReader.FileData fileData:
+				return new FileDataNode(fileData);
+			case ZipFileReader.DataDescriptor dataDescriptor:
+				return new DataDescriptorNode(dataDescriptor);
+			default:
+				throw new Exception("Unknown section type");
 		}
-	}
-
-	public virtual string TreeNodeLabel
-	{
-		get { throw new Exception("TreeNodeLabel must be implemented"); }
-	}
-
-	public virtual int TreeNodeIcon
-	{
-		get { return (int)TreeViewIcon.NullIcon; }
 	}
 
 	public virtual DynamicTableData TableData()
 	{ 
-		DynamicTableData td = new DynamicTableData(3);
-		td.SetColumn(0, "Property");
-		td.SetColumn(1, "Value");
-		td.SetColumn(2, "Description");
-		PopulateTableData(td);
+		DynamicTableData td = new DynamicTableData(4, "Zip.PropertyValueDescription");
+		td.SetColumn(0, "Offset");
+		td.SetColumn(1, "Property");
+		td.SetColumn(2, "Value");
+		td.SetColumn(3, "Description");
+		var rows = GetRows();
+		long offset = Section.StartPosition;
+		for(int i = 0; i < rows.Length; i++)
+		{
+			if(offset < 0x0100000000) {
+				td.AddRow((uint)offset, rows[i][0], rows[i][1], rows[i].Length > 2 ? rows[i][2] : "");
+			}
+			else {
+				td.AddRow((ulong)offset, rows[i][0], rows[i][1], rows[i].Length > 2 ? rows[i][2] : "");
+			}
+			
+			offset += GetValueSize(rows[i][1]);
+		}
 		return td;
 	}
 
-	public virtual void PopulateTableData(DynamicTableData td)
+	private static long GetValueSize(object value)
 	{
-	
+		return value switch
+		{
+			byte => sizeof(byte),
+			sbyte => sizeof(sbyte),
+			short => sizeof(short),
+			ushort => sizeof(ushort),
+			int => sizeof(int),
+			uint => sizeof(uint),
+			long => sizeof(long),
+			ulong => sizeof(ulong),
+			float => sizeof(float),
+			double => sizeof(double),
+			byte[] arr => arr.Length,
+			_ => 0
+		};
+	}
+
+	public virtual object[][] GetRows()
+	{
+		return [];
 	}
 }
 
 class LocalFileHeaderNode : SectionNode
 {
-	public ZipFileReader.LocalFileHeader LocalFileHeader;
 
-	public LocalFileHeaderNode(ZipFileReader.LocalFileHeader localFileHeader)
+	public LocalFileHeaderNode(ZipFileReader.LocalFileHeader localFileHeader) 
+		: base(localFileHeader, "Local File Header", TreeViewIcon.Header)
 	{
-		LocalFileHeader = localFileHeader;
 	}
 
-	public override string TreeNodeLabel
+	public override string Description
 	{
-		get { return "Local File Header"; }
+		get { return "Local File Header (" + ((ZipFileReader.LocalFileHeader)Section).FileNameText + ")"; }
 	}
 
-	public override int TreeNodeIcon
+	public override object[][] GetRows()
 	{
-		get { return (int)TreeViewIcon.Header; }
-	}
-
-	public override void PopulateTableData(DynamicTableData td)
-	{
-		var d = LocalFileHeader;
+		var d = (ZipFileReader.LocalFileHeader)Section;
 		object[][] rows = [
 			["Local Header Signature", d.LocFileHeadSign],
 			["Version Needed To Extract", d.VersionToExtract],
-			["General Purpose Bit Flag", d.GeneralPurposeBitFlag],
+			["General Purpose Bit Flag", d.GeneralPurposeBitFlag, Constants.GeneralPurposeBitFlagDescription(d.GeneralPurposeBitFlag, d.CompressionMethod)],
 			["Compression Method", d.CompressionMethod, Constants.COMPRESSION_METHODS.ContainsKey(d.CompressionMethod) ? Constants.COMPRESSION_METHODS[d.CompressionMethod] : "Unknown"],
 			["Last Mod File Time", d.LastModFileTime, d.LastModFileTimeText],
 			["Last Mod File Date", d.LastModFileDate, d.LastModFileDateText],
@@ -81,89 +128,148 @@ class LocalFileHeaderNode : SectionNode
 			["Compressed Size", d.CompSize, ByteCountFormatter.Format(d.CompSize)],
 			["Uncompressed Size", d.UnCompSize, ByteCountFormatter.Format(d.UnCompSize)],
 			["File Name Length", d.FileNameLength, ByteCountFormatter.Format(d.FileNameLength)],
-			["Extra Field Length", d.ExtraFieldLength, ByteCountFormatter.Format(d.ExtraFieldLen)],
+			["Extra Field Length", d.ExtraFieldLength, ByteCountFormatter.Format(d.ExtraFieldLength)],
 			["File Name", d.FileName, d.FileNameText],
 			["Extra Field", d.ExtraField]
 		];
-		td.AddRows(rows);
+		return rows;
 	}
 }
 
+class DeflateBlockNode : TreeNode
+{
+	public DeflateStreamReader.Block Block;
+
+	public override Ufex.API.Visual.Visual[] Visuals
+	{
+		get 
+		{ 
+			if(Block.Type != DeflateStreamReader.BlockType.DynamicHuffman || Block.LiteralCodeMap == null || Block.DistanceCodeMap == null)
+			{
+				return [];
+			}
+			return [ new TreeDiagramVisual(BuildVisualTree(Block.LiteralCodeMap), "Deflate Block Structure") ];
+		}
+	}
+
+	public DeflateBlockNode(DeflateStreamReader.Block block)
+		: base("Deflate Block", TreeViewIcon.Table, TreeViewIcon.Table)
+	{
+		Block = block;
+		if(block.Type == DeflateStreamReader.BlockType.Stored)
+		{
+			Text = "Stored Block";
+		}
+		else if(block.Type == DeflateStreamReader.BlockType.DynamicHuffman)
+		{
+			Text = "Dynamic Huffman Block";
+		}
+		else if(block.Type == DeflateStreamReader.BlockType.StaticHuffman)
+		{
+			Text = "Static Huffman Block";
+		}
+		else
+		{
+			Text = "Reserved Block";
+		}
+	}
+
+	private static TreeDiagramVisual.Node BuildVisualTree(Dictionary<int, (int code, int len)> codeMap)
+	{
+		TreeDiagramVisual.Node root = new TreeDiagramVisual.Node("Root");
+		foreach (var entry in codeMap)
+		{
+			if (entry.Value.len == 0) continue;
+			TreeDiagramVisual.Node current = root;
+			for (int i = entry.Value.len - 1; i >= 0; i--)
+			{
+				int bit = (entry.Value.code >> i) & 1;
+				while (current.Children.Count < 2) current.Children.Add(new TreeDiagramVisual.Node(current.Children.Count.ToString()));
+				current = current.Children[bit];
+			}
+			string hex = $"0x{entry.Key:X2}";
+			string ascii = (entry.Key >= 32 && entry.Key <= 126) ? $" '{(char)entry.Key}'" : "";
+			current.Label = $"{hex}{ascii}";
+			current.Children = null;
+		}
+		return root;
+	}
+
+}
 
 class FileDataNode : SectionNode
 {
-	public ZipFileReader.FileData FileData;
-
 	public FileDataNode(ZipFileReader.FileData fileData)
+		: base(fileData, "File Data", TreeViewIcon.Table)
 	{
-		FileData = fileData;
+		foreach(var block in fileData.Blocks)
+		{
+			Nodes.Add(new DeflateBlockNode(block));
+		}
 	}
 
-	public override string TreeNodeLabel { get { return "File Data"; } }
+	public override string Description
+	{
+		get { return "File Data"; }
+	}
 
-	public override int TreeNodeIcon { get { return (int)TreeViewIcon.Table; } }
 }
 
 class DataDescriptorNode : SectionNode
 {
-	public ZipFileReader.DataDescriptor DataDescriptor;
-
 	public DataDescriptorNode(ZipFileReader.DataDescriptor dataDescriptor)
+		: base(dataDescriptor, "Data Descriptor", TreeViewIcon.Table)
 	{
-		DataDescriptor = dataDescriptor;
 	}
 
-	public override string TreeNodeLabel { get { return "Data Descriptor"; } }
-	public override int TreeNodeIcon { get { return (int)TreeViewIcon.Table; } }
+	public override string Description
+	{
+		get { return "Data Descriptor"; }
+	}
+
+	public override object[][] GetRows()
+	{
+		var d = (ZipFileReader.DataDescriptor)Section;
+		object[][] rows = [
+			["CRC-32", d.Crc32],
+			["Compressed Size", d.CompressedSize, ByteCountFormatter.Format(d.CompressedSize)],
+			["Uncompressed Size", d.UncompressedSize, ByteCountFormatter.Format(d.UncompressedSize)],
+		];
+		return rows;
+	}
 }
 
 
 class CompressedFileNode : SectionNode
 {
-	public ZipFileReader.CompressedFile CompressedFile;
-
-	public override TreeNode Node 
-	{
-		get
-		{
-			TreeNode tnFileComp = new TreeNode(TreeNodeLabel, TreeNodeIcon, TreeNodeIcon);
-			tnFileComp.Nodes.Add(new LocalFileHeaderNode(CompressedFile.Header).Node);
-			tnFileComp.Nodes.Add(new FileDataNode(CompressedFile.FileData).Node);
-			return tnFileComp;
-		}
-	}
-
-	public override string TreeNodeLabel
-	{
-		get { return CompressedFile.Header.FileNameText; }
-	}
-
-	public override int TreeNodeIcon
-	{
-		get { return (int)TreeViewIcon.Document; }
-	}
-
 	public CompressedFileNode(ZipFileReader.CompressedFile compressedFile)
+		: base(compressedFile, compressedFile.Header.FileNameText, TreeViewIcon.Document)
 	{
-		CompressedFile = compressedFile;
+		Nodes.Add(new LocalFileHeaderNode(compressedFile.Header));
+		Nodes.Add(new FileDataNode(compressedFile.FileData));
+	}
+
+	public override string Description
+	{
+		get { return "Compressed File (" + ((ZipFileReader.CompressedFile)Section).Header.FileNameText + ")"; }
 	}
 }
 
 class CentralDirectoryHeaderNode : SectionNode
 {
-	public ZipFileReader.CentralDirectoryHeader CentralDirectoryHeader;
-
-	public override string TreeNodeLabel { get { return "Central Directory Header"; } }
-	public override int TreeNodeIcon { get { return (int)TreeViewIcon.Header; } }
-
 	public CentralDirectoryHeaderNode(ZipFileReader.CentralDirectoryHeader centralDirectoryHeader)
+		: base(centralDirectoryHeader, "Central Directory Header", TreeViewIcon.Header)
 	{
-		CentralDirectoryHeader = centralDirectoryHeader;
 	}
 
-	public override void PopulateTableData(DynamicTableData td)
+	public override string Description
 	{
-		var d = CentralDirectoryHeader;
+		get { return "Central Directory Header (" + ((ZipFileReader.CentralDirectoryHeader)Section).FileNameText + ")"; }
+	}
+
+	public override object[][] GetRows()
+	{
+		var d = (ZipFileReader.CentralDirectoryHeader)Section;
 		object[][] rows = [
 			["Central File Header Signature", d.CentralFileHeaderSignature],
 			["Version Made By", d.VersionMadeBy],
@@ -175,7 +281,7 @@ class CentralDirectoryHeaderNode : SectionNode
 			["CRC-32", d.Crc32],
 			["Compressed Size", d.CompressedSize, ByteCountFormatter.Format(d.CompressedSize)],
 			["Uncompressed Size", d.UncompressedSize, ByteCountFormatter.Format(d.UncompressedSize)],
-			["File Name Length", d.FileNameLengthgth, ByteCountFormatter.Format(d.FileNameLengthgth)],
+			["File Name Length", d.FileNameLength, ByteCountFormatter.Format(d.FileNameLength)],
 			["Extra Field Length", d.ExtraFieldLength, ByteCountFormatter.Format(d.ExtraFieldLength)],
 			["File Comment Length", d.FileCommentLength, ByteCountFormatter.Format(d.FileCommentLength)],
 			["Disk Number Start", d.DiskNumberStart],
@@ -186,7 +292,36 @@ class CentralDirectoryHeaderNode : SectionNode
 			["Extra Field", d.ExtraField],
 			["File Comment", d.FileComment, d.FileCommentText]
 		];
-		td.AddRows(rows);
+		return rows;
+	}
+}
+class EndOfCentralDirectoryRecordNode : SectionNode
+{
+	public EndOfCentralDirectoryRecordNode(ZipFileReader.EndOfCentralDirectoryRecord record)
+		: base(record, "End of Central Directory Record", TreeViewIcon.Header)
+	{
+	}
+
+	public override string Description
+	{
+		get { return "End of Central Directory Record"; }
+	}
+
+	public override object[][] GetRows()
+	{
+		var d = (ZipFileReader.EndOfCentralDirectoryRecord)Section;
+		object[][] rows = [
+			["End of Central Directory Signature", d.EndOfCentralDirSignature],
+			["Number of This Disk", d.NumberOfThisDisk],
+			["Disk Where Central Directory Starts", d.DiskWhereCentralDirectoryStarts],
+			["Number of Central Directory Records on This Disk", d.NumberOfCentralDirectoryRecordsOnThisDisk],
+			["Total Number of Central Directory Records", d.TotalNumberOfCentralDirectoryRecords],
+			["Size of Central Directory", d.SizeOfCentralDirectory, ByteCountFormatter.Format(d.SizeOfCentralDirectory)],
+			["Offset of Start of Central Directory", d.OffsetOfStartOfCentralDirectoryWithRespectToStartingDiskNumber],
+			["ZIP File Comment Length", d.ZIPFileCommentLength, ByteCountFormatter.Format(d.ZIPFileCommentLength)],
+			["ZIP File Comment", d.ZIPFileComment, d.ZIPFileCommentText]
+		];
+		return rows;
 	}
 }
 
@@ -226,6 +361,38 @@ internal static class Constants
 		else
 			return "Unknown";
 	}
+
+	public static string GeneralPurposeBitFlagDescription(UInt16 flag, UInt16 compressionMethod)
+	{
+		List<string> descriptions = new List<string>();
+		if (ByteUtil.GetBit(flag, 0)) descriptions.Add("Encrypted");
+		if (compressionMethod == 6) {
+			descriptions.Add(ByteUtil.GetBit(flag, 1) ? "8K sliding dictionary" : "4K sliding dictionary");
+			descriptions.Add(ByteUtil.GetBit(flag, 2) ? "3 Shannon-Fano trees" : "2 Shannon-Fano trees");
+		}
+		else if (compressionMethod == 8 || compressionMethod == 9) {
+			var bit1 = ByteUtil.GetBit(flag, 1);
+			var bit2 = ByteUtil.GetBit(flag, 2);
+			if(bit1 && bit2)
+				descriptions.Add("Super Fast compression");
+			else if(!bit1 && bit2)
+				descriptions.Add("Fast compression");
+			else if(bit1 && !bit2)
+				descriptions.Add("Maximum compression");
+			else
+				descriptions.Add("Normal compression");
+		}
+		else if(compressionMethod == 14) {
+			descriptions.Add(ByteUtil.GetBit(flag, 1) ? "end-of-stream marker" : "no end-of-stream marker");
+		}
+		if (ByteUtil.GetBit(flag, 3)) descriptions.Add("Data descriptor present");
+		if (ByteUtil.GetBit(flag, 4) && compressionMethod == 8) descriptions.Add("Enhanced deflation");
+		if (ByteUtil.GetBit(flag, 5)) descriptions.Add("Compressed patched data");
+		if (ByteUtil.GetBit(flag, 6)) descriptions.Add("Strong encryption");
+		if (ByteUtil.GetBit(flag, 11)) descriptions.Add("Language encoding flag (UTF-8 filenames and comments)");
+		if (ByteUtil.GetBit(flag, 12)) descriptions.Add("Reserved by PKWARE for enhanced compression");
+		return string.Join(", ", descriptions);
+	}
 }
 
 /// <summary>
@@ -233,48 +400,91 @@ internal static class Constants
 /// </summary>
 public class ZipFileType : FileType
 {
-	List<ZipFileReader.Section> Parts = new List<ZipFileReader.Section>();
-	
+	protected List<ZipFileReader.Section> Parts { get; set; }
+
+	protected FileMap? Map { get; set; }
+
 	public ZipFileType()
 	{
 		ShowTechnical = true;
-		ShowGraphic = false;
-		ShowFileCheck = false;
+		ShowGraphic = true;
+		ShowFileCheck = true;
 		Parts = new List<ZipFileReader.Section>();
 	}
 
 	public override bool ProcessFile()
 	{	
-		TreeNode tnFiles = new TreeNode("Files", (int)TreeViewIcon.FolderClosed, (int)TreeViewIcon.FolderOpen);
-		TreeNode tnOther = new TreeNode("Other Data", (int)TreeViewIcon.FolderClosed, (int)TreeViewIcon.FolderOpen);
-		ZipFileReader zipReader = new ZipFileReader(FileInStream, Log);
+		ZipFileReader zipReader = new ZipFileReader(FileInStream, Log, ValidationReport);
 		bool result = zipReader.Read();
 
-		foreach(ZipFileReader.Section segment in zipReader.Parts)
-		{
-			Parts.Add(segment);
-			var index = Parts.Count - 1;
-			switch(segment)
-			{
-				case ZipFileReader.CompressedFile compFile:
-					tnFiles.Nodes.Add(new CompressedFileNode(compFile).Node);
-					break;
-				case ZipFileReader.CentralDirectoryHeader centralDir:
-					tnOther.Nodes.Add(new CentralDirectoryHeaderNode(centralDir).Node);
-					break;
-				default:
-					break;
-			}
-		}
-		TreeNodes.Add(tnFiles);
-		TreeNodes.Add(tnOther);
+		BuildQuickInfo(zipReader);
+		BuildVisuals(zipReader);
+		BuildStructure(zipReader);
 		return result;
 	}
 
-	public override TableData? GetData(TreeNode tn)
+	protected void BuildQuickInfo(ZipFileReader zipReader)
+	{
+		var parts = zipReader.Parts;
+		var quickInfo = QuickInfoTable;
+		quickInfo.AddRow("Number of Files", parts.FindAll(p => p is ZipFileReader.CompressedFile).Count.ToString());
+		quickInfo.AddRow("Compression Methods", string.Join(", ", parts.OfType<ZipFileReader.CompressedFile>().Select(f => Constants.CompressionMethodDescription(f.Header.CompressionMethod)).Distinct()));
+		foreach(var part in parts)
+		{
+			if(part is ZipFileReader.EndOfCentralDirectoryRecord eocdRecord)
+			{
+				quickInfo.AddRow("ZIP Comment", eocdRecord.ZIPFileCommentText);
+			}
+		}
+	}
+
+	protected void BuildVisuals(ZipFileReader zipReader)
+	{
+		var spans = new List<FileSpan>();
+		foreach(ZipFileReader.Section segment in zipReader.Parts)
+		{
+			SectionNode node = SectionNode.FromSection(segment);
+			spans.Add(new FileSpan
+			{
+				StartPosition = segment.StartPosition,
+				EndPosition = segment.EndPosition,
+				Name = node.Description
+			});
+		}
+		
+		// Create the FileMap from collected spans
+		Map = new FileMap(spans.ToArray(), (ulong)FileInStream.Length);
+		VisualsList.Add(Map);
+	}
+
+	protected void BuildStructure(ZipFileReader zipReader) 
+	{
+		TreeNode tnFiles = new TreeNode("Files", TreeViewIcon.FolderClosed, TreeViewIcon.FolderOpen);
+		TreeNode tnOther = new TreeNode("Other Data", TreeViewIcon.FolderClosed, TreeViewIcon.FolderOpen);
+	
+		foreach(ZipFileReader.Section segment in zipReader.Parts)
+		{
+			Log.Info($"Processing segment at position {segment.StartPosition}, type {segment.GetType().Name}");
+			SectionNode node = SectionNode.FromSection(segment);
+			switch(segment)
+			{
+				case ZipFileReader.CompressedFile compFile:
+					tnFiles.Nodes.Add(node);
+					break;
+				default:
+					tnOther.Nodes.Add(node);
+					break;
+			}
+		}
+		
+		TreeNodes.Add(tnFiles);
+		TreeNodes.Add(tnOther);
+	}
+
+/* 	public override TableData? GetData(TreeNode tn)
 	{
 		if (tn.Tag is not SectionNode node)
 			return null;
 		return node.TableData();
-	}
+	} */
 }
