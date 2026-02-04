@@ -8,13 +8,14 @@ using Ufex.API.Tables;
 using Ufex.API.Tree;
 using Ufex.API.Format;
 using Ufex.API.Visual;
+using Ufex.FileTypes.ZIP.Data;
 using System.Reflection.Emit;
 
 namespace Ufex.FileTypes.ZIP;
 
 internal class SectionNode : TreeNode
 {
-	public ZipFileReader.Section Section;
+	public Section Section;
 
 	public virtual string Description
 	{
@@ -26,27 +27,27 @@ internal class SectionNode : TreeNode
 		get { return [ new DataGridVisual(TableData(), "Data") ]; }
 	}
 
-	public SectionNode(ZipFileReader.Section section, string text, TreeViewIcon imageIndex) 
+	public SectionNode(Section section, string text, TreeViewIcon imageIndex) 
 		: base(text, imageIndex, imageIndex)
 	{
 		Section = section;
 	}
 
-	public static SectionNode FromSection(ZipFileReader.Section section)
+	public static SectionNode FromSection(Section section)
 	{
 		switch(section)
 		{
-			case ZipFileReader.CompressedFile compFile:
+			case CompressedFile compFile:
 				return new CompressedFileNode(compFile);
-			case ZipFileReader.CentralDirectoryHeader centralDir:
+			case CentralDirectoryHeader centralDir:
 				return new CentralDirectoryHeaderNode(centralDir);
-			case ZipFileReader.EndOfCentralDirectoryRecord endRecord:
+			case EndOfCentralDirectoryRecord endRecord:
 				return new EndOfCentralDirectoryRecordNode(endRecord);
-			case ZipFileReader.LocalFileHeader localFileHeader:
+			case LocalFileHeader localFileHeader:
 				return new LocalFileHeaderNode(localFileHeader);
-			case ZipFileReader.FileData fileData:
+			case FileData fileData:
 				return new FileDataNode(fileData);
-			case ZipFileReader.DataDescriptor dataDescriptor:
+			case DataDescriptor dataDescriptor:
 				return new DataDescriptorNode(dataDescriptor);
 			default:
 				throw new Exception("Unknown section type");
@@ -104,19 +105,19 @@ internal class SectionNode : TreeNode
 class LocalFileHeaderNode : SectionNode
 {
 
-	public LocalFileHeaderNode(ZipFileReader.LocalFileHeader localFileHeader) 
+	public LocalFileHeaderNode(LocalFileHeader localFileHeader) 
 		: base(localFileHeader, "Local File Header", TreeViewIcon.Header)
 	{
 	}
 
 	public override string Description
 	{
-		get { return "Local File Header (" + ((ZipFileReader.LocalFileHeader)Section).FileNameText + ")"; }
+		get { return "Local File Header (" + ((LocalFileHeader)Section).FileNameText + ")"; }
 	}
 
 	public override object[][] GetRows()
 	{
-		var d = (ZipFileReader.LocalFileHeader)Section;
+		var d = (LocalFileHeader)Section;
 		object[][] rows = [
 			["Local Header Signature", d.LocFileHeadSign],
 			["Version Needed To Extract", d.VersionToExtract],
@@ -125,8 +126,8 @@ class LocalFileHeaderNode : SectionNode
 			["Last Mod File Time", d.LastModFileTime, d.LastModFileTimeText],
 			["Last Mod File Date", d.LastModFileDate, d.LastModFileDateText],
 			["CRC-32", d.Crc32],
-			["Compressed Size", d.CompSize, ByteCountFormatter.Format(d.CompSize)],
-			["Uncompressed Size", d.UnCompSize, ByteCountFormatter.Format(d.UnCompSize)],
+			["Compressed Size", d.CompressedSize, ByteCountFormatter.Format(d.CompressedSize)],
+			["Uncompressed Size", d.UncompressedSize, ByteCountFormatter.Format(d.UncompressedSize)],
 			["File Name Length", d.FileNameLength, ByteCountFormatter.Format(d.FileNameLength)],
 			["Extra Field Length", d.ExtraFieldLength, ByteCountFormatter.Format(d.ExtraFieldLength)],
 			["File Name", d.FileName, d.FileNameText],
@@ -199,12 +200,15 @@ class DeflateBlockNode : TreeNode
 
 class FileDataNode : SectionNode
 {
-	public FileDataNode(ZipFileReader.FileData fileData)
+	public FileDataNode(FileData fileData)
 		: base(fileData, "File Data", TreeViewIcon.Table)
 	{
-		foreach(var block in fileData.Blocks)
+		if(fileData.Blocks != null)
 		{
-			Nodes.Add(new DeflateBlockNode(block));
+			foreach(var block in fileData.Blocks)
+			{
+				Nodes.Add(new DeflateBlockNode(block));
+			}
 		}
 	}
 
@@ -217,7 +221,7 @@ class FileDataNode : SectionNode
 
 class DataDescriptorNode : SectionNode
 {
-	public DataDescriptorNode(ZipFileReader.DataDescriptor dataDescriptor)
+	public DataDescriptorNode(DataDescriptor dataDescriptor)
 		: base(dataDescriptor, "Data Descriptor", TreeViewIcon.Table)
 	{
 	}
@@ -229,7 +233,7 @@ class DataDescriptorNode : SectionNode
 
 	public override object[][] GetRows()
 	{
-		var d = (ZipFileReader.DataDescriptor)Section;
+		var d = (DataDescriptor)Section;
 		object[][] rows = [
 			["CRC-32", d.Crc32],
 			["Compressed Size", d.CompressedSize, ByteCountFormatter.Format(d.CompressedSize)],
@@ -242,34 +246,37 @@ class DataDescriptorNode : SectionNode
 
 class CompressedFileNode : SectionNode
 {
-	public CompressedFileNode(ZipFileReader.CompressedFile compressedFile)
+	public CompressedFileNode(CompressedFile compressedFile)
 		: base(compressedFile, compressedFile.Header.FileNameText, TreeViewIcon.Document)
 	{
 		Nodes.Add(new LocalFileHeaderNode(compressedFile.Header));
-		Nodes.Add(new FileDataNode(compressedFile.FileData));
+		if(compressedFile.FileData.CompressedSize > 0) 
+		{
+			Nodes.Add(new FileDataNode(compressedFile.FileData));
+		}
 	}
 
 	public override string Description
 	{
-		get { return "Compressed File (" + ((ZipFileReader.CompressedFile)Section).Header.FileNameText + ")"; }
+		get { return "Compressed File (" + ((CompressedFile)Section).Header.FileNameText + ")"; }
 	}
 }
 
 class CentralDirectoryHeaderNode : SectionNode
 {
-	public CentralDirectoryHeaderNode(ZipFileReader.CentralDirectoryHeader centralDirectoryHeader)
+	public CentralDirectoryHeaderNode(CentralDirectoryHeader centralDirectoryHeader)
 		: base(centralDirectoryHeader, "Central Directory Header", TreeViewIcon.Header)
 	{
 	}
 
 	public override string Description
 	{
-		get { return "Central Directory Header (" + ((ZipFileReader.CentralDirectoryHeader)Section).FileNameText + ")"; }
+		get { return "Central Directory Header (" + ((CentralDirectoryHeader)Section).FileNameText + ")"; }
 	}
 
 	public override object[][] GetRows()
 	{
-		var d = (ZipFileReader.CentralDirectoryHeader)Section;
+		var d = (CentralDirectoryHeader)Section;
 		object[][] rows = [
 			["Central File Header Signature", d.CentralFileHeaderSignature],
 			["Version Made By", d.VersionMadeBy],
@@ -297,7 +304,7 @@ class CentralDirectoryHeaderNode : SectionNode
 }
 class EndOfCentralDirectoryRecordNode : SectionNode
 {
-	public EndOfCentralDirectoryRecordNode(ZipFileReader.EndOfCentralDirectoryRecord record)
+	public EndOfCentralDirectoryRecordNode(EndOfCentralDirectoryRecord record)
 		: base(record, "End of Central Directory Record", TreeViewIcon.Header)
 	{
 	}
@@ -309,7 +316,7 @@ class EndOfCentralDirectoryRecordNode : SectionNode
 
 	public override object[][] GetRows()
 	{
-		var d = (ZipFileReader.EndOfCentralDirectoryRecord)Section;
+		var d = (EndOfCentralDirectoryRecord)Section;
 		object[][] rows = [
 			["End of Central Directory Signature", d.EndOfCentralDirSignature],
 			["Number of This Disk", d.NumberOfThisDisk],
@@ -400,7 +407,7 @@ internal static class Constants
 /// </summary>
 public class ZipFileType : FileType
 {
-	protected List<ZipFileReader.Section> Parts { get; set; }
+	protected List<Section> Parts { get; set; }
 
 	protected FileMap? Map { get; set; }
 
@@ -409,12 +416,12 @@ public class ZipFileType : FileType
 		ShowTechnical = true;
 		ShowGraphic = true;
 		ShowFileCheck = true;
-		Parts = new List<ZipFileReader.Section>();
+		Parts = new List<Section>();
 	}
 
 	public override bool ProcessFile()
 	{	
-		ZipFileReader zipReader = new ZipFileReader(FileInStream, Log, ValidationReport);
+		ZipStreamReader zipReader = new ZipStreamReader(FileInStream, Log, ValidationReport);
 		bool result = zipReader.Read();
 
 		BuildQuickInfo(zipReader);
@@ -423,25 +430,25 @@ public class ZipFileType : FileType
 		return result;
 	}
 
-	protected void BuildQuickInfo(ZipFileReader zipReader)
+	protected void BuildQuickInfo(ZipStreamReader zipReader)
 	{
 		var parts = zipReader.Parts;
 		var quickInfo = QuickInfoTable;
-		quickInfo.AddRow("Number of Files", parts.FindAll(p => p is ZipFileReader.CompressedFile).Count.ToString());
-		quickInfo.AddRow("Compression Methods", string.Join(", ", parts.OfType<ZipFileReader.CompressedFile>().Select(f => Constants.CompressionMethodDescription(f.Header.CompressionMethod)).Distinct()));
+		quickInfo.AddRow("Number of Files", parts.FindAll(p => p is CompressedFile).Count.ToString());
+		quickInfo.AddRow("Compression Methods", string.Join(", ", parts.OfType<CompressedFile>().Select(f => Constants.CompressionMethodDescription(f.Header.CompressionMethod)).Distinct()));
 		foreach(var part in parts)
 		{
-			if(part is ZipFileReader.EndOfCentralDirectoryRecord eocdRecord)
+			if(part is EndOfCentralDirectoryRecord eocdRecord)
 			{
 				quickInfo.AddRow("ZIP Comment", eocdRecord.ZIPFileCommentText);
 			}
 		}
 	}
 
-	protected void BuildVisuals(ZipFileReader zipReader)
+	protected void BuildVisuals(ZipStreamReader zipReader)
 	{
 		var spans = new List<FileSpan>();
-		foreach(ZipFileReader.Section segment in zipReader.Parts)
+		foreach(Section segment in zipReader.Parts)
 		{
 			SectionNode node = SectionNode.FromSection(segment);
 			spans.Add(new FileSpan
@@ -457,18 +464,18 @@ public class ZipFileType : FileType
 		VisualsList.Add(Map);
 	}
 
-	protected void BuildStructure(ZipFileReader zipReader) 
+	protected void BuildStructure(ZipStreamReader zipReader) 
 	{
 		TreeNode tnFiles = new TreeNode("Files", TreeViewIcon.FolderClosed, TreeViewIcon.FolderOpen);
 		TreeNode tnOther = new TreeNode("Other Data", TreeViewIcon.FolderClosed, TreeViewIcon.FolderOpen);
 	
-		foreach(ZipFileReader.Section segment in zipReader.Parts)
+		foreach(Section segment in zipReader.Parts)
 		{
 			Log.Info($"Processing segment at position {segment.StartPosition}, type {segment.GetType().Name}");
 			SectionNode node = SectionNode.FromSection(segment);
 			switch(segment)
 			{
-				case ZipFileReader.CompressedFile compFile:
+				case CompressedFile compFile:
 					tnFiles.Nodes.Add(node);
 					break;
 				default:
@@ -481,10 +488,4 @@ public class ZipFileType : FileType
 		TreeNodes.Add(tnOther);
 	}
 
-/* 	public override TableData? GetData(TreeNode tn)
-	{
-		if (tn.Tag is not SectionNode node)
-			return null;
-		return node.TableData();
-	} */
 }
