@@ -32,7 +32,7 @@ public class PngStreamReader
 
 		// Read the header
 		byte[] header = fr.ReadBytes(8);
-		if(!CompareArrays(header, PortableNetworkGraphic.SIGNATURE))
+		if(!CompareArrays(header, Signatures.SIGNATURE))
 		{
 			// Invalid header
 			throw new Exception("Invalid PNG file signature.");
@@ -55,7 +55,8 @@ public class PngStreamReader
 			Chunk? newChunk = Chunk.CreateChunk(chunkTypeStr, fr, ColorType);
 			if(newChunk == null)
 			{
-				throw new Exception("Failed to create PNG chunk of type: " + chunkTypeStr);
+				newChunk = new Chunk(fr);
+				ValidationReport.Warning($"Unknown PNG chunk type: {chunkTypeStr}, skipping {length} bytes of data.");
 			}
 
 			if(chunkTypeStr == CHUNK_IHDR)

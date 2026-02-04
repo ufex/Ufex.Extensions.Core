@@ -17,9 +17,8 @@ class GamaChunkNode : ChunkNode
 	public override object[][] GetRows()
 	{
 		var d = (GamaChunk)Chunk;
-		object[][] rows = [
+		return [
 			["Gamma", d.Gamma],
 		];
-		return rows;
 	}
 }

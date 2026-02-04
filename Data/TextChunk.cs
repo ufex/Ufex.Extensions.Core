@@ -7,8 +7,12 @@ namespace Ufex.FileTypes.PNG.Data;
 /// </summary>
 internal class TextChunk : Chunk
 {
-	public string Keyword { get; init; }
-	public string TextString { get; init; }
+	public byte[] Keyword { get; init; }
+	public byte? NullSeparator { get; init; }
+	public byte[] TextString { get; init; }
+
+	public string KeywordString => System.Text.Encoding.Latin1.GetString(Keyword);
+	public string TextStringString => System.Text.Encoding.Latin1.GetString(TextString);
 
 	public TextChunk(FileReader fr) : base(fr)
 	{
@@ -18,20 +22,25 @@ internal class TextChunk : Chunk
 		int nullPos = Array.IndexOf(chunkData, (byte)0);
 		if (nullPos < 0)
 		{
+			NullSeparator = null;
 			nullPos = chunkData.Length;
+		}
+		else
+		{
+			NullSeparator = chunkData[nullPos];
 		}
 
 		// Keyword is everything before the null
-		Keyword = System.Text.Encoding.Latin1.GetString(chunkData, 0, nullPos);
+		Keyword = chunkData[0..nullPos];
 
 		// Text string is everything after the null
 		if (nullPos + 1 < chunkData.Length)
 		{
-			TextString = System.Text.Encoding.Latin1.GetString(chunkData, nullPos + 1, chunkData.Length - nullPos - 1);
+			TextString = chunkData[(nullPos + 1)..];
 		}
 		else
 		{
-			TextString = string.Empty;
+			TextString = Array.Empty<byte>();
 		}
 	}
 }

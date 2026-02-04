@@ -112,7 +112,7 @@ public class PngFileType : FileType
 		switch (chunkType)
 		{
 			case "IHDR":
-					var ihdr = (IhdrChunk)chunk;
+				var ihdr = (IhdrChunk)chunk;
 				Width = (int)ihdr.Width;
 				Height = (int)ihdr.Height;
 				colorType = ihdr.ColorType;
@@ -120,14 +120,14 @@ public class PngFileType : FileType
 				break;
 
 			case "gAMA":
-					var gama = (GamaChunk)chunk;
+				var gama = (GamaChunk)chunk;
 				// PNG gamma is stored as gamma * 100000
 				double gamma = gama.Gamma / 100000.0;
 				Metadata["Gamma"] = gamma.ToString("F5");
 				break;
 
 			case "pHYs":
-					var phys = (PhysChunk)chunk;
+				var phys = (PhysChunk)chunk;
 				string unitName = phys.Unit == 1 ? "Metre" : "Unknown";
 				Metadata["Pixel Unit"] = unitName;
 				Metadata["Pixels per unit X"] = phys.PixelsPerUnitX.ToString();
@@ -135,9 +135,9 @@ public class PngFileType : FileType
 				break;
 
 			case "tEXt":
-					var text = (TextChunk)chunk;
-				string keyword = text.Keyword;
-				string value = text.TextString;
+				var text = (TextChunk)chunk;
+				string keyword = text.KeywordString;
+				string value = text.TextStringString;
 				
 				// Map known PNG text keywords to metadata
 				if (keyword.Equals("Software", StringComparison.OrdinalIgnoreCase))

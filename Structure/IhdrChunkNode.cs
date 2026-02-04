@@ -24,7 +24,7 @@ class IhdrChunkNode : ChunkNode
 	public override object[][] GetRows()
 	{
 		var d = (IhdrChunk)Chunk;
-		object[][] rows = [
+		return [
 			["Width", d.Width, d.Width.ToString() + " pixels"],
 			["Height", d.Height, d.Height.ToString() + " pixels"],
 			["Bit Depth", d.BitDepth],
@@ -33,6 +33,5 @@ class IhdrChunkNode : ChunkNode
 			["Filter Method", d.FilterMethod, d.FilterMethod == 0 ? "Adaptive" : Unknown],
 			["Interlace Method", d.InterlaceMethod, _interlaceMethods.ContainsKey(d.InterlaceMethod) ? _interlaceMethods[d.InterlaceMethod] : Unknown],
 		];
-		return rows;
 	}
 }

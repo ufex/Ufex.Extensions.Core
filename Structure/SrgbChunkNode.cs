@@ -17,9 +17,8 @@ class SrgbChunkNode : ChunkNode
 	public override object[][] GetRows()
 	{
 		var d = (SrgbChunk)Chunk;
-		object[][] rows = [
+		return [
 			["Rendering Intent", d.RenderingIntent],
 		];
-		return rows;
 	}
 }

@@ -16,5 +16,16 @@ class HistChunkNode : ChunkNode
 	{
 	}
 
-	// TODO
+	public override object[][] GetRows()
+	{
+		var d = (HistChunk)Chunk;
+		var rows = new List<object[]>();
+
+		for (int i = 0; i < d.Frequencies.Length; i++)
+		{
+			rows.Add([$"Frequency [{i}]", d.Frequencies[i]]);
+		}
+
+		return rows.ToArray();
+	}
 }

@@ -18,8 +18,9 @@ class TextChunkNode : ChunkNode
 	{
 		var d = (TextChunk)Chunk;
 		object[][] rows = [
-			["Keyword", d.Keyword],
-			["Text String", d.TextString],
+			["Keyword", d.Keyword, d.KeywordString],
+			["Null Separator", d.NullSeparator],
+			["Text String", d.TextString, d.TextStringString],
 		];
 		return rows;
 	}

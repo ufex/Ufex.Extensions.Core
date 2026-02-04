@@ -2,6 +2,24 @@ using Ufex.API;
 
 namespace Ufex.FileTypes.PNG.Data;
 
+internal struct SugPalEntry8
+{
+	public byte Red;
+	public byte Green;
+	public byte Blue;
+	public byte Alpha;
+	public ushort Frequency;
+}
+
+internal struct SugPalEntry16
+{
+	public ushort Red;
+	public ushort Green;
+	public ushort Blue;
+	public ushort Alpha;
+	public ushort Frequency;
+}
+
 /// <summary>
 /// sPLT - Suggested palette
 /// </summary>

@@ -17,12 +17,11 @@ class IccpChunkNode : ChunkNode
 	public override object[][] GetRows()
 	{
 		var d = (IccpChunk)Chunk;
-		object[][] rows = [
+		return [
 			["Profile Name", d.ProfileName],
 			["Compression Method", d.CompressionMethod, d.CompressionMethod == 0 ? "Deflate" : "Unknown"],
 			["Compressed Size", d.CompressedProfile.Length, d.CompressedProfile.Length.ToString() + " bytes"],
 			["Profile Size", d.Profile != null ? d.Profile.Length : 0, d.Profile != null ? (d.Profile.Length.ToString() + " bytes") : ""],
 		];
-		return rows;
 	}
 }
