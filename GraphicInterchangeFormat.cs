@@ -7,7 +7,7 @@ using System.Drawing;
 using Ufex.API;
 using Ufex.API.Tables;
 
-namespace Ufex.FileTypes.Images
+namespace Ufex.FileTypes.Image
 {
 	internal struct RGB
 	{
@@ -120,10 +120,10 @@ namespace Ufex.FileTypes.Images
 		const byte EXT_APPLICATION =    0xFF;
 		const byte EXT_COMMENT =        0xFE;
 
-		const byte BLOCK_PLAINTEXT =	0x01;
+		const byte BLOCK_PLAINTEXT =    0x01;
 		const byte BLOCK_EXTINTRO =     0x21;
-		const byte BLOCK_IMAGEDESC =	0x2C;
-		const byte BLOCK_TRAILER =		0x3B;
+		const byte BLOCK_IMAGEDESC =    0x2C;
+		const byte BLOCK_TRAILER =      0x3B;
 		const byte BLOCK_GRPHCTRLEXT =  0xF9;
 		const byte BLOCK_COMEXT	=       0xFE;
 		const byte BLOCK_APPEXT	=       0xFF;
@@ -639,13 +639,13 @@ namespace Ufex.FileTypes.Images
 			return td;
 		}
 		
-		public override Image GetImage()
+		public override System.Drawing.Image GetImage()
 		{
-			Image myImage = null;
+			System.Drawing.Image myImage = null;
 			try
 			{							
 				m_FileStream.Position = 0;
-				myImage = Image.FromStream(m_FileStream);
+				myImage = System.Drawing.Image.FromStream(m_FileStream);
 			}
 			catch(System.Runtime.InteropServices.ExternalException e)
 			{

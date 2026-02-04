@@ -1,28 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net48</TargetFramework>
     <RootNamespace>Ufex.FileTypes.Image</RootNamespace>
     <AssemblyName>GIF</AssemblyName>
-    <BaseOutputPath>bin\</BaseOutputPath>
     <AssemblyVersion>1.3.0.0</AssemblyVersion>
-	<SignAssembly>False</SignAssembly>
-	<Company>Edward Potocko</Company>
-	<Product>Universal File Explorer</Product>
-	<PackageReadmeFile>README.md</PackageReadmeFile>
-	<RepositoryUrl>https://github.com/epotocko/UfexGIF</RepositoryUrl>
-	<RepositoryType>git</RepositoryType>
-	<FileVersion>1.3.0.0</FileVersion>
-	<Version>1.3.0.0</Version>
-	<Copyright>Copyright (C) Eddie Potocko 2005 - 2021</Copyright>
+    <FileVersion>1.3.0.0</FileVersion>
+    <Version>1.3.0.0</Version>
+    <RepositoryUrl>https://github.com/epotocko/UfexGIF</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
  
   <ItemGroup>
-    <ProjectReference Include="..\..\ufex\UfexAPI\UfexAPI.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="System.Windows.Forms" />
+    <ProjectReference Include="..\..\src\Ufex.API\Ufex.API.csproj" />
   </ItemGroup>
 
 </Project>
