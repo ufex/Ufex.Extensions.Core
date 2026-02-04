@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Windows.Forms;
 
 using Ufex.API;
@@ -9,6 +10,19 @@ namespace Ufex.FileTypes
 {
 	class Member
 	{
+		readonly static Dictionary<byte, string> COMPRESSION_METHODS = new Dictionary<byte, string>
+		{
+			{ 0x00, "reserved" },
+			{ 0x01, "reserved" },
+			{ 0x02, "reserved" },
+			{ 0x03, "reserved" },
+			{ 0x04, "reserved" },
+			{ 0x05, "reserved" },
+			{ 0x06, "reserved" },
+			{ 0x07, "reserved" },
+			{ 0x08, "deflate" },
+		};
+
 		byte id1;
 		byte id2;
 		byte compMethod;
@@ -41,22 +55,22 @@ namespace Ufex.FileTypes
 			operatingSystem = fr.ReadByte();
 
 			// Read the FEXTRA
-			if (DataManip.GetBit(flags, 2))
+			if (ByteUtil.GetBit(flags, 2))
 			{
 				extraLength = fr.ReadUInt16();
 				extraBytes = fr.ReadBytes(extraLength);
 			}
 
 			// Read the FNAME
-			if (DataManip.GetBit(flags, 3))
-				fileName = fr.ReadNullTermString();
+			if (ByteUtil.GetBit(flags, 3))
+				fileName = fr.ReadNullTerminatedString();
 
 			// Read the FCOMMENT
-			if (DataManip.GetBit(flags, 4))
-				fileComment = fr.ReadNullTermString();
+			if (ByteUtil.GetBit(flags, 4))
+				fileComment = fr.ReadNullTerminatedString();
 
 			// Read the FHCRC
-			if (DataManip.GetBit(flags, 1))
+			if (ByteUtil.GetBit(flags, 1))
 				crc16 = fr.ReadUInt16();
 		}
 
@@ -64,8 +78,18 @@ namespace Ufex.FileTypes
 		{
 			td.AddRow("ID1", id1);
 			td.AddRow("ID2", id2);
-			td.AddRow("Compression Method", compMethod);
-			td.AddRow("Flags", flags);
+
+			string compMethodString = COMPRESSION_METHODS.ContainsKey(compMethod) ? COMPRESSION_METHODS[compMethod] : "unknown";
+			td.AddRow("Compression Method", compMethod, compMethodString);
+
+			List<string> flagNames = new List<string>();
+			if (ByteUtil.GetBit(flags, 0)) flagNames.Add("FTEXT");
+			if (ByteUtil.GetBit(flags, 1)) flagNames.Add("FHCRC");
+			if (ByteUtil.GetBit(flags, 2)) flagNames.Add("FEXTRA");
+			if (ByteUtil.GetBit(flags, 3)) flagNames.Add("FNAME");
+			if (ByteUtil.GetBit(flags, 4)) flagNames.Add("FCOMMENT");
+			td.AddRow("Flags", flags, string.Join(" | ", flagNames));
+
 			td.AddRow("Modification Time", modTime);
 			td.AddRow("Extra Flags", extraFlags);
 			td.AddRow("Operating System", operatingSystem);
@@ -82,7 +106,7 @@ namespace Ufex.FileTypes
 			if (fileComment != null)
 				td.AddRow("File Comment", fileComment);
 
-			if (DataManip.GetBit(flags, 1))
+			if (ByteUtil.GetBit(flags, 1))
 				td.AddRow("CRC16", crc16);
 
 			return td;
@@ -156,9 +180,10 @@ namespace Ufex.FileTypes
 
 			if (tn.Tag != null)
 			{
-				DynamicTableData td = new DynamicTableData(2);
+				DynamicTableData td = new DynamicTableData(3);
 				td.SetColumn(0, "Property");
 				td.SetColumn(1, "Value");
+				td.SetColumn(2, "Details");
 				td = members[(int)tn.Tag].GetTableData(td);
 				return td;
 			}
