@@ -88,37 +88,10 @@ internal class ChunkNode : TreeNode
 		long offset = Chunk.Offset + 8; // Skip length and type fields
 		for(int i = 0; i < rows.Length; i++)
 		{
-			if(offset < 0x0100000000) 
-			{
-				td.AddRow(rows[i][0], rows[i][1], rows[i].Length > 2 ? rows[i][2] : "", (UInt32)offset);
-			}
-			else
-			{
-				td.AddRow(rows[i][0], rows[i][1], rows[i].Length > 2 ? rows[i][2] : "", offset);
-			}
-
-			offset += GetValueSize(rows[i][1]);
+			td.AddRow(rows[i][0], rows[i][1], rows[i].Length > 2 ? rows[i][2] : "", new FileOffset((UInt32)offset));
+			offset += ByteUtil.GetObjectSize(rows[i][1]);
 		}
 		return td;
-	}
-
-	private static long GetValueSize(object value)
-	{
-		return value switch
-		{
-			byte => sizeof(byte),
-			sbyte => sizeof(sbyte),
-			short => sizeof(short),
-			ushort => sizeof(ushort),
-			int => sizeof(int),
-			uint => sizeof(uint),
-			long => sizeof(long),
-			ulong => sizeof(ulong),
-			float => sizeof(float),
-			double => sizeof(double),
-			byte[] arr => arr.Length,
-			_ => 0
-		};
 	}
 
 	public virtual object[][] GetRows()
