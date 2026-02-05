@@ -9,9 +9,5 @@
     <RepositoryUrl>https://github.com/epotocko/UfexZIP</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
   </PropertyGroup>
- 
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\Ufex.API\Ufex.API.csproj" />
-  </ItemGroup>
 
 </Project>
