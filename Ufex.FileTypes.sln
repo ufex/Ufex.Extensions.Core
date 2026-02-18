@@ -8,11 +8,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugins", "Plugins", "{1111
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ufex.FileTypes.BMP", "src\Ufex.FileTypes.BMP\Ufex.FileTypes.BMP.csproj", "{22220001-0001-0001-0001-000000000001}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ufex.FileTypes.GIF", "src\Ufex.FileTypes.GIF\UfexGIF.csproj", "{22220002-0002-0002-0002-000000000002}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ufex.FileTypes.GIF", "src\Ufex.FileTypes.GIF\Ufex.FileTypes.GIF.csproj", "{22220002-0002-0002-0002-000000000002}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ufex.FileTypes.GZIP", "src\Ufex.FileTypes.GZIP\UfexGZIP.csproj", "{22220003-0003-0003-0003-000000000003}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ufex.FileTypes.GZIP", "src\Ufex.FileTypes.GZIP\Ufex.FileTypes.GZIP.csproj", "{22220003-0003-0003-0003-000000000003}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ufex.FileTypes.INI", "src\Ufex.FileTypes.INI\UfexINI.csproj", "{22220004-0004-0004-0004-000000000004}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ufex.FileTypes.INI", "src\Ufex.FileTypes.INI\Ufex.FileTypes.INI.csproj", "{22220004-0004-0004-0004-000000000004}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ufex.FileTypes.PNG", "src\Ufex.FileTypes.PNG\Ufex.FileTypes.PNG.csproj", "{22220005-0005-0005-0005-000000000005}"
 EndProject

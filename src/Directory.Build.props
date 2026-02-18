@@ -4,9 +4,9 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Company>Edward Potocko</Company>
+    <Company>Ufex</Company>
     <Product>Universal File Explorer</Product>
-    <Copyright>Copyright (C) Eddie Potocko 2005 - 2026</Copyright>
+    <Copyright>Copyright (C) Ed Potocko 2005 - 2026</Copyright>
     <!-- Disable auto-generated assembly info to avoid conflicts with legacy AssemblyInfo.cs files -->
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
