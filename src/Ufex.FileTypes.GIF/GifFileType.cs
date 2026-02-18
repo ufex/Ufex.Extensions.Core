@@ -19,7 +19,7 @@ public class GifFileType : FileType
 		ShowGraphic = true;
 		ShowTechnical = true;
 		ShowFileCheck = true;
-		Log.SetLogName("GIF.log");
+		Description = "GIF Image";
 	}
 
 	public override bool ProcessFile()

@@ -1,6 +1,7 @@
 using Ufex.API;
 using Ufex.API.Validation;
 using Ufex.FileTypes.GIF.Data;
+using Microsoft.Extensions.Logging;
 
 namespace Ufex.FileTypes.GIF;
 
@@ -128,24 +129,24 @@ public class GifStreamReader
 				{
 					case Constants.EXT_GRAPHIC_CONTROL:
 						pendingGraphicControl = new GraphicControlExtension(fr);
-						Log.Info($"Graphic Control Extension: delay={pendingGraphicControl.DelayTime}");
+						Log.LogInformation($"Graphic Control Extension: delay={pendingGraphicControl.DelayTime}");
 						break;
 
 					case Constants.EXT_APPLICATION:
 						var appExt = new ApplicationExtension(fr);
 						ApplicationExtensions.Add(appExt);
-						Log.Info($"Application Extension: {appExt.ApplicationIdentifierString}");
+						Log.LogInformation($"Application Extension: {appExt.ApplicationIdentifierString}");
 						break;
 
 					case Constants.EXT_COMMENT:
 						var commentExt = new CommentExtension(fr);
 						CommentExtensions.Add(commentExt);
-						Log.Info($"Comment Extension: {commentExt.CommentText.Length} chars");
+						Log.LogInformation($"Comment Extension: {commentExt.CommentText.Length} chars");
 						break;
 
 					case Constants.EXT_PLAIN_TEXT:
 						var plainTextExt = new PlainTextExtension(fr);
-						Log.Info($"Plain Text Extension: {plainTextExt.TextContent.Length} chars");
+						Log.LogInformation($"Plain Text Extension: {plainTextExt.TextContent.Length} chars");
 						break;
 
 					default:

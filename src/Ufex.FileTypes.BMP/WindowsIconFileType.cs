@@ -16,8 +16,6 @@ public class WindowsIconFileType : FileType
 	public WindowsIconFileType()
 	{
 		Description = "Windows Icon (ICO)";
-		Log.SetLogName("ICO.log");
-
 		ShowTechnical = true;
 		ShowGraphic = true;
 		ShowFileCheck = true;

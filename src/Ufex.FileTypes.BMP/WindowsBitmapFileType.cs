@@ -15,8 +15,6 @@ public class WindowsBitmapFileType : FileType
 	public WindowsBitmapFileType()
 	{
 		Description = "Windows Bitmap (BMP)";
-		Log.SetLogName("BMP.log");
-
 		ShowTechnical = true;
 		ShowGraphic = true;
 		ShowFileCheck = true;
