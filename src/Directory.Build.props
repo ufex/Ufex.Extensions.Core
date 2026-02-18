@@ -1,5 +1,5 @@
 <Project>
-  <!-- Common properties for all plugin projects in Ufex.FileTypes -->
+  <!-- Common properties for all plugin projects in Ufex.Extensions.Core -->
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
@@ -13,12 +13,12 @@
 
   <!-- Common project reference to Ufex.API -->
   <ItemGroup>
-    <ProjectReference Include="$(MSBuildThisFileDirectory)..\..\src\Ufex.API\Ufex.API.csproj" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)..\..\..\src\Ufex.API\Ufex.API.csproj" />
   </ItemGroup>
 
   <!-- Output all plugins to the Desktop app's plugins directory -->
   <PropertyGroup>
-    <PluginOutputDir>$(MSBuildThisFileDirectory)..\..\src\Ufex.Desktop\bin\Debug\net10.0\plugins\</PluginOutputDir>
+    <PluginOutputDir>$(MSBuildThisFileDirectory)..\..\..\src\Ufex.Desktop\bin\Debug\net10.0\plugins\</PluginOutputDir>
   </PropertyGroup>
 
   <!-- Copy plugin DLL to plugins directory after build -->
