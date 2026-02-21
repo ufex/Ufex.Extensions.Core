@@ -16,14 +16,29 @@
     <ProjectReference Include="$(MSBuildThisFileDirectory)..\..\..\src\Ufex.API\Ufex.API.csproj" />
   </ItemGroup>
 
-  <!-- Output all plugins to the Desktop app's plugins directory -->
+  <!-- Output all plugins to the build staging directory -->
   <PropertyGroup>
-    <PluginOutputDir>$(MSBuildThisFileDirectory)..\..\..\src\Ufex.Desktop\bin\Debug\net10.0\plugins\</PluginOutputDir>
+    <PluginOutputDir>$(MSBuildThisFileDirectory)..\..\..\build\plugins\</PluginOutputDir>
+    <ConfigOutputDir>$(MSBuildThisFileDirectory)..\..\..\build\config\</ConfigOutputDir>
   </PropertyGroup>
 
-  <!-- Copy plugin DLL to plugins directory after build -->
+  <!-- Copy plugin DLL and extra files to build/plugins directory after build -->
   <Target Name="CopyPluginToOutput" AfterTargets="Build">
     <MakeDir Directories="$(PluginOutputDir)" />
     <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(PluginOutputDir)" SkipUnchangedFiles="true" />
+    <!-- Copy additional whitelisted file types from build output -->
+    <ItemGroup>
+      <_PluginExtraFiles Include="$(TargetDir)*.onnx;$(TargetDir)*.onnx.data" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_PluginExtraFiles)" DestinationFolder="$(PluginOutputDir)" SkipUnchangedFiles="true" Condition="'@(_PluginExtraFiles)' != ''" />
+  </Target>
+
+  <!-- Copy config files to the build/config directory -->
+  <Target Name="CopyConfigToOutput" AfterTargets="Build">
+    <ItemGroup>
+      <ConfigFiles Include="$(MSBuildThisFileDirectory)..\config\*.xml" />
+    </ItemGroup>
+    <MakeDir Directories="$(ConfigOutputDir)" Condition="'@(ConfigFiles)' != ''" />
+    <Copy SourceFiles="@(ConfigFiles)" DestinationFolder="$(ConfigOutputDir)" SkipUnchangedFiles="true" Condition="'@(ConfigFiles)' != ''" />
   </Target>
 </Project>
