@@ -75,7 +75,7 @@ internal class ChunkNode : TreeNode
 
 	public virtual DynamicTableData TableData()
 	{ 
-		DynamicTableData td = new DynamicTableData(4, "Zip.PropertyValueDescription");
+		DynamicTableData td = new DynamicTableData(4, "PNG.PropertyValueDescription");
 		td.SetColumn(0, "Property");
 		td.SetColumn(1, "Value");
 		td.SetColumn(2, "Description");
