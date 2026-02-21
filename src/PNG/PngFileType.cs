@@ -67,7 +67,6 @@ public class PngFileType : FileType
 		ShowGraphic = true;
 		ShowTechnical = true;
 		ShowFileCheck = false;
-		Log.SetLogName("PNG.log");
 	}
 
 	public override bool ProcessFile()
