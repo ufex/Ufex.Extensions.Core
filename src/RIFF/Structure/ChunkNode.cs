@@ -16,7 +16,17 @@ internal class ChunkNode : TreeNode
 		{ typeof(ZStrChunk), typeof(ZStrChunkNode) },
 		{ typeof(ListChunk), typeof(ListChunkNode) },
 		{ typeof(InfoListChunk), typeof(ListChunkNode) },
-		{ typeof(RIFF.Data.Wave.FmtChunk), typeof(Structure.Wave.FmtChunkNode) }
+		{ typeof(RIFF.Data.Wave.AdtlListChunk), typeof(ListChunkNode) },
+		{ typeof(RIFF.Data.Wave.FmtChunk), typeof(Structure.Wave.FmtChunkNode) },
+		{ typeof(RIFF.Data.Wave.FactChunk), typeof(Structure.Wave.FactChunkNode) },
+		{ typeof(RIFF.Data.Wave.DataChunk), typeof(Structure.Wave.DataChunkNode) },
+		{ typeof(RIFF.Data.Wave.CueChunk), typeof(Structure.Wave.CueChunkNode) },
+		{ typeof(RIFF.Data.Wave.PlstChunk), typeof(Structure.Wave.PlstChunkNode) },
+		{ typeof(RIFF.Data.Wave.SmplChunk), typeof(Structure.Wave.SmplChunkNode) },
+		{ typeof(RIFF.Data.Wave.InstChunk), typeof(Structure.Wave.InstChunkNode) },
+		{ typeof(RIFF.Data.Wave.LablChunk), typeof(Structure.Wave.LablChunkNode) },
+		{ typeof(RIFF.Data.Wave.NoteChunk), typeof(Structure.Wave.NoteChunkNode) },
+		{ typeof(RIFF.Data.Wave.LtxtChunk), typeof(Structure.Wave.LtxtChunkNode) }
 	};
 
 	protected Chunk _chunk;

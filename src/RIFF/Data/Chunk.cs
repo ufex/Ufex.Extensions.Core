@@ -1,13 +1,19 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Microsoft.VisualBasic;
 using Ufex.API;
 
 namespace Ufex.Extensions.Core.RIFF.Data;
 
+/// <summary>
+/// Base class for RIFF chunks. A chunk consists of a 4-byte chunk ID, 
+/// a 4-byte size field, and the chunk data.
+/// </summary>
 internal class Chunk
 {
+	/// <summary>
+	/// Core RIFF Chunk Types
+	/// </summary>
 	private static readonly Dictionary<string, Type> CHUNK_TYPES = new()
 	{
 		{ "RIFF", typeof(RiffChunk) },
@@ -15,14 +21,21 @@ internal class Chunk
 		{ "CSET", typeof(CsetChunk) }
 	};
 
+	/// <summary>
+	/// RIFF Chunk Formats
+	/// </summary>
 	private static readonly Dictionary<string, Type> RIFF_CHUNK_TYPES = new()
 	{
 		{ "WAVE", typeof(Data.Wave.WaveRiffChunk) }
 	};
 
+	/// <summary>
+	/// LIST Chunk Sub-Types
+	/// </summary>
 	private static readonly Dictionary<string, Type> LIST_CHUNK_TYPES = new()
 	{
-		{ "INFO", typeof(InfoListChunk) }
+		{ "INFO", typeof(InfoListChunk) },
+		{ "adtl", typeof(Data.Wave.AdtlListChunk) }
 	};
 
 	/// <summary>
@@ -138,6 +151,7 @@ internal class Chunk
 
 		return (Chunk?)Activator.CreateInstance(chunkClass, fr);
 	}
+
 	public static Chunk? CreateRiffChunk(byte[] chunkType, FileReader fr)
 	{
 		return CreateRiffChunk(System.Text.Encoding.ASCII.GetString(chunkType), fr);

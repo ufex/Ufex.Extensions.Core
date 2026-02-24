@@ -2,6 +2,19 @@ using Ufex.API;
 
 namespace Ufex.Extensions.Core.RIFF.Data;
 
+/// <summary>
+/// Base class for RIFF chunks. Typically a subclass of RiffChunk 
+/// will represent a specific RIFF format (e.g. WAVE, AVI, etc.) and will 
+/// define the ChunkTypes dictionary to specify which chunk types are valid 
+/// for that format. The RiffChunk class itself can be used for generic RIFF 
+/// chunks where the specific format has not been implemented.
+/// 
+/// A RIFF chunk contains a FormatID that specifies the type of chunk, 
+/// and a list of sub-chunks that are contained within it. The ChunkTypes 
+/// dictionary is used to determine which class to instantiate for each 
+/// sub-chunk based on its ID when reading the chunk data. For example, in 
+/// a WAVE RIFF chunk, the "fmt " sub-chunk would be mapped to the FmtChunk class.
+/// </summary>
 internal class RiffChunk : Chunk
 {
 	/// <summary>

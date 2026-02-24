@@ -18,8 +18,8 @@
 
   <!-- Output all plugins to the build staging directory -->
   <PropertyGroup>
-    <PluginOutputDir>$(MSBuildThisFileDirectory)..\..\..\build\plugins\</PluginOutputDir>
-    <ConfigOutputDir>$(MSBuildThisFileDirectory)..\..\..\build\config\</ConfigOutputDir>
+    <PluginOutputDir>$(MSBuildThisFileDirectory)..\..\..\build\$(Configuration)\$(TargetFramework)\$(Platform)\plugins\</PluginOutputDir>
+    <ConfigOutputDir>$(MSBuildThisFileDirectory)..\..\..\build\$(Configuration)\$(TargetFramework)\$(Platform)\config\</ConfigOutputDir>
   </PropertyGroup>
 
   <!-- Copy plugin DLL and extra files to build/plugins directory after build -->

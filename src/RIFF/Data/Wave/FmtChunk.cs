@@ -2,6 +2,9 @@ using Ufex.API;
 
 namespace Ufex.Extensions.Core.RIFF.Data.Wave;
 
+/// <summary>
+/// fmt - Format chunk
+/// </summary>
 internal class FmtChunk : Chunk
 {
 	const int FORMAT_PCM = 0x0001;
