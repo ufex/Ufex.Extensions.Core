@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Extensions.Logging;
+
 using Ufex.API;
 using Ufex.API.Tables;
 using Ufex.API.Validation;
@@ -32,7 +34,7 @@ public class GzipStreamReader
 			Member member = new Member(fr);
 			Members.Add(member);
 			break; // TODO: Implement reading the compressed data and the footer, and then loop to read the next member if it exists
-			Log.Info($"Position = {_fileStream.Position}");
+			Log.LogInformation($"Position = {_fileStream.Position}");
 		}
 
 		return true;

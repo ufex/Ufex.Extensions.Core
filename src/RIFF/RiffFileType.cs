@@ -3,6 +3,7 @@ using System.Collections;
 using System.IO;
 using System.Reflection;
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 
 using Ufex.API;
 using Ufex.API.Tables;
@@ -92,7 +93,7 @@ public class RiffFileType : FileType
 	{
 		foreach(Chunk chunk in riffReader.Chunks)
 		{
-			Log.Info($"Processing chunk at position {chunk.Offset}, type {chunk.GetType().Name}");
+			Log.LogInformation($"Processing chunk at position {chunk.Offset}, type {chunk.GetType().Name}");
 			ChunkNode node = ChunkNode.FromChunk(chunk);
 			TreeNodes.Add(node);
 		}

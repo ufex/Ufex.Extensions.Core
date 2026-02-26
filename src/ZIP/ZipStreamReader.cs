@@ -1,8 +1,11 @@
 using System.Collections;
 using System.Text;
 using System.IO.Compression;
+using Microsoft.Extensions.Logging;
+
 using Ufex.API;
 using Ufex.API.Validation;
+
 using Ufex.Extensions.Core.ZIP.Data;
 
 namespace Ufex.Extensions.Core.ZIP;
@@ -36,15 +39,15 @@ public class ZipStreamReader
 		Dictionary<UInt64, UInt64> fileSizes = FindSections(br);
 		foreach(var kvp in fileSizes)
 		{
-			Log.Info($"Found Local File Header at offset {kvp.Key} with compressed size {kvp.Value}");
+			Log.LogInformation($"Found Local File Header at offset {kvp.Key} with compressed size {kvp.Value}");
 		}
 		// Reset to start
 		fileStream.Position = 0;
 		while(br.PeekByte() == 0x50)
 		{
 			UInt32 sign = br.ReadUInt32();
-			Log.Info("Reading ZIP section with signature: " + sign.ToString("X8"));
-			Log.Info("  File stream position: " + fileStream.Position.ToString());
+			Log.LogInformation("Reading ZIP section with signature: " + sign.ToString("X8"));
+			Log.LogInformation("  File stream position: " + fileStream.Position.ToString());
 
 			// Rewind
 			fileStream.Position -= 4;
@@ -71,10 +74,10 @@ public class ZipStreamReader
 				ValidationReport.Error("Unknown ZIP section signature " + sign.ToString("X8") + " at position " + fileStream.Position.ToString());
 				throw new Exception("Unknown ZIP section signature: " + sign.ToString("X8"));
 			}
-			Log.Info("File stream position: " + fileStream.Position.ToString());
+			Log.LogInformation("File stream position: " + fileStream.Position.ToString());
 		}
-		Log.Info("Finished reading ZIP file. Peek Byte = " + br.PeekByte().ToString());
-		Log.Info("File stream position: " + fileStream.Position.ToString());
+		Log.LogInformation("Finished reading ZIP file. Peek Byte = " + br.PeekByte().ToString());
+		Log.LogInformation("File stream position: " + fileStream.Position.ToString());
 		return true;
 	}
 

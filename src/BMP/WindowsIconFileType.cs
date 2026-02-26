@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
+
 using Ufex.API;
 using Ufex.API.Tree;
 using Ufex.API.Visual;

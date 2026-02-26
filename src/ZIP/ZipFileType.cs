@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Extensions.Logging;
+
 using Ufex.API;
 using Ufex.API.Tree;
 using Ufex.API.Visual;
@@ -78,7 +80,7 @@ public class ZipFileType : FileType
 	
 		foreach(Section segment in zipReader.Parts)
 		{
-			Log.Info($"Processing segment at position {segment.StartPosition}, type {segment.GetType().Name}");
+			Log.LogInformation($"Processing segment at position {segment.StartPosition}, type {segment.GetType().Name}");
 			SectionNode node = SectionNode.FromSection(segment);
 			switch(segment)
 			{

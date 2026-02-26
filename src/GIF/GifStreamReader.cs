@@ -1,7 +1,9 @@
+using Microsoft.Extensions.Logging;
+
 using Ufex.API;
 using Ufex.API.Validation;
+
 using Ufex.Extensions.Core.GIF.Data;
-using Microsoft.Extensions.Logging;
 
 namespace Ufex.Extensions.Core.GIF;
 
@@ -79,7 +81,7 @@ public class GifStreamReader
 
 		// Read Header
 		Header = new Header(fr);
-		Log.Info($"Read GIF header: {Header.Signature}{Header.Version}");
+		Log.LogInformation($"Read GIF header: {Header.Signature}{Header.Version}");
 
 		// Validate signature
 		if (Header.Signature != "GIF")
@@ -96,13 +98,13 @@ public class GifStreamReader
 
 		// Read Logical Screen Descriptor
 		LogicalScreenDescriptor = new LogicalScreenDescriptor(fr);
-		Log.Info($"Logical Screen: {LogicalScreenDescriptor.Width}x{LogicalScreenDescriptor.Height}");
+		Log.LogInformation($"Logical Screen: {LogicalScreenDescriptor.Width}x{LogicalScreenDescriptor.Height}");
 
 		// Read Global Color Table if present
 		if (LogicalScreenDescriptor.GlobalColorTableFlag)
 		{
 			GlobalColorTable = new ColorTable(fr, LogicalScreenDescriptor.SizeOfGlobalColorTable);
-			Log.Info($"Global Color Table: {GlobalColorTable.ColorCount} colors");
+			Log.LogInformation($"Global Color Table: {GlobalColorTable.ColorCount} colors");
 		}
 
 		// Read blocks until trailer
@@ -115,7 +117,7 @@ public class GifStreamReader
 			if (blockType == Constants.BLOCK_TRAILER)
 			{
 				// End of GIF
-				Log.Info("Read GIF trailer");
+				Log.LogInformation("Read GIF trailer");
 				break;
 			}
 			else if (blockType == Constants.BLOCK_EXTENSION)
@@ -163,7 +165,7 @@ public class GifStreamReader
 
 				var frame = ReadFrame(fr, pendingGraphicControl);
 				Frames.Add(frame);
-				Log.Info($"Frame {frame.FrameIndex}: {frame.ImageDescriptor.Width}x{frame.ImageDescriptor.Height}");
+				Log.LogInformation($"Frame {frame.FrameIndex}: {frame.ImageDescriptor.Width}x{frame.ImageDescriptor.Height}");
 
 				pendingGraphicControl = null;
 			}
@@ -176,7 +178,7 @@ public class GifStreamReader
 		}
 
 		IsValid = true;
-		Log.Info($"GIF parsed: {Frames.Count} frames");
+		Log.LogInformation($"GIF parsed: {Frames.Count} frames");
 		return true;
 	}
 

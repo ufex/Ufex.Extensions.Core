@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Logging;
+
 using Ufex.API;
 using Ufex.API.Validation;
 using Ufex.Extensions.Core.BMP.Data;
@@ -42,7 +44,7 @@ public class IcoStreamReader
 
 		// Read Icon Directory header
 		Header = new IconDir(fr);
-		Log.Info($"Read IconDir at offset {Header.Offset}, Count={Header.Count}");
+		Log.LogInformation($"Read IconDir at offset {Header.Offset}, Count={Header.Count}");
 
 		// Validate header
 		if (Header.Reserved != 0)
@@ -59,7 +61,7 @@ public class IcoStreamReader
 		{
 			var entry = new IconDirEntry(fr);
 			Entries.Add(entry);
-			Log.Info($"Read IconDirEntry[{i}] at offset {entry.Offset}: {entry.ActualWidth}x{entry.ActualHeight}");
+			Log.LogInformation($"Read IconDirEntry[{i}] at offset {entry.Offset}: {entry.ActualWidth}x{entry.ActualHeight}");
 
 			if (entry.Reserved != 0)
 				ValidationReport.Warning($"Entry[{i}] bReserved should be zero");
@@ -77,7 +79,7 @@ public class IcoStreamReader
 
 			if (firstByte == 0x89)  // PNG signature starts with 0x89
 			{
-				Log.Info($"Image[{i}] appears to be PNG format - skipping detailed parsing");
+				Log.LogInformation($"Image[{i}] appears to be PNG format - skipping detailed parsing");
 				ValidationReport.Info($"Image[{i}] is embedded PNG format");
 				continue;
 			}
@@ -86,12 +88,12 @@ public class IcoStreamReader
 			{
 				var image = new IconImage(fr, i, entry);
 				Images.Add(image);
-				Log.Info($"Read IconImage[{i}] at offset {image.Offset}");
+				Log.LogInformation($"Read IconImage[{i}] at offset {image.Offset}");
 			}
 			catch (Exception ex)
 			{
 				ValidationReport.Warning($"Failed to parse image[{i}]: {ex.Message}");
-				Log.Info($"Error reading IconImage[{i}]: {ex.Message}");
+				Log.LogInformation($"Error reading IconImage[{i}]: {ex.Message}");
 			}
 		}
 

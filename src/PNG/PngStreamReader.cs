@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Extensions.Logging;
+
 using Ufex.API;
 using Ufex.API.Tables;
 using Ufex.API.Validation;
+
 using Ufex.Extensions.Core.PNG.Data;
 
 namespace Ufex.Extensions.Core.PNG;
@@ -44,7 +47,7 @@ public class PngStreamReader
 		{
 			UInt32 length = fr.ReadUInt32(); // Length of chunk data (exclusive of Length, Type, CRC)
 			char[] chunkType = fr.ReadChars(4);
-			Log.Info($"Reading PNG chunk of type: {new string(chunkType)} with length: {length}");
+			Log.LogInformation($"Reading PNG chunk of type: {new string(chunkType)} with length: {length}");
 
 			// Rewind, so the chunk constructor can read the full chunk data
 			_fileStream.Seek(-8, SeekOrigin.Current);
@@ -69,14 +72,14 @@ public class PngStreamReader
 			long adjustement = length - (endPos - startPos);
 			if(adjustement > 0)
 			{
-				Log.Info($"Adjusting stream position by {adjustement} bytes for chunk type {chunkTypeStr}");
+				Log.LogInformation($"Adjusting stream position by {adjustement} bytes for chunk type {chunkTypeStr}");
 				_fileStream.Seek(length - (endPos - startPos), SeekOrigin.Current);
 			}
 
 			newChunk.CRC.Value = fr.ReadBytes(4);
 
 			Chunks.Add(newChunk);
-			Log.Info($"Position = {_fileStream.Position}");
+			Log.LogInformation($"Position = {_fileStream.Position}");
 		}
 
 		return true;

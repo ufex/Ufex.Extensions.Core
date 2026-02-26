@@ -1,8 +1,11 @@
 using System;
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
+
 using Ufex.API;
 using Ufex.API.Tables;
 using Ufex.API.Visual;
+
 using Ufex.Extensions.Core.INI.Data;
 using Ufex.Extensions.Core.INI.Structure;
 
@@ -133,7 +136,7 @@ public class IniFileType : FileType
 	{
 		foreach (var section in reader.Sections)
 		{
-			Log.Info($"Adding section node: {(section.IsGlobal ? "(Global)" : section.Name)}");
+			Log.LogInformation($"Adding section node: {(section.IsGlobal ? "(Global)" : section.Name)}");
 			var sectionNode = new SectionNode(section);
 			TreeNodes.Add(sectionNode);
 		}
