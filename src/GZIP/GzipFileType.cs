@@ -17,7 +17,6 @@ public class GzipFileType : FileType
 		ShowGraphic = true;
 		ShowTechnical = true;
 		ShowFileCheck = true;
-		Log.SetLogName("GZIP.log");
 	}
 
 	public override bool ProcessFile()

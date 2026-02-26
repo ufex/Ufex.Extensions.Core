@@ -19,7 +19,6 @@ public class IniFileType : FileType
 		ShowGraphic = true;
 		ShowTechnical = true;
 		ShowFileCheck = true;
-		Log.SetLogName("INI.log");
 	}
 
 	public override bool ProcessFile()
