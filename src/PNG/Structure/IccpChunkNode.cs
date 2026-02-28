@@ -10,7 +10,7 @@ namespace Ufex.Extensions.Core.PNG.Structure;
 class IccpChunkNode : ChunkNode
 {
 	public IccpChunkNode(IccpChunk chunk)
-		: base(chunk, "iCCP", "Embedded ICC profile", TreeViewIcon.Section)
+		: base(chunk, "iCCP", "Embedded ICC profile", TreeViewIcon.Properties)
 	{
 	}
 

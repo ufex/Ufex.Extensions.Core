@@ -10,7 +10,7 @@ namespace Ufex.Extensions.Core.PNG.Structure;
 class IendChunkNode : ChunkNode
 {
 	public IendChunkNode(IendChunk chunk)
-		: base(chunk, "IEND", "Image trailer", TreeViewIcon.Section)
+		: base(chunk, "IEND", "Image trailer", TreeViewIcon.Footer)
 	{
 	}
 }

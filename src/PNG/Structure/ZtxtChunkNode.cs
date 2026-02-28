@@ -10,7 +10,7 @@ namespace Ufex.Extensions.Core.PNG.Structure;
 class ZtxtChunkNode : ChunkNode
 {
 	public ZtxtChunkNode(ZtxtChunk chunk)
-		: base(chunk, "zTXt", "Compressed textual data", TreeViewIcon.Section)
+		: base(chunk, "zTXt", "Compressed textual data", TreeViewIcon.Text)
 	{
 	}
 }

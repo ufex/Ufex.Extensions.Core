@@ -17,7 +17,7 @@ class IhdrChunkNode : ChunkNode
 	};
 
 	public IhdrChunkNode(IhdrChunk chunk)
-		: base(chunk, "IHDR", "Image header", TreeViewIcon.Section)
+		: base(chunk, "IHDR", "Image header", TreeViewIcon.Header)
 	{
 	}
 

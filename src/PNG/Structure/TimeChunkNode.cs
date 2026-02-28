@@ -11,7 +11,7 @@ namespace Ufex.Extensions.Core.PNG.Structure;
 class TimeChunkNode : ChunkNode
 {
 	public TimeChunkNode(TimeChunk chunk) 
-		: base(chunk, "tIME", "Image last-modification time", TreeViewIcon.Section)
+		: base(chunk, "tIME", "Image last-modification time", TreeViewIcon.Properties)
 	{
 	}
 

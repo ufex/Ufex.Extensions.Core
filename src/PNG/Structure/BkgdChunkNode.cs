@@ -11,7 +11,7 @@ namespace Ufex.Extensions.Core.PNG.Structure;
 class BkgdChunkNode : ChunkNode
 {
 	public BkgdChunkNode(BkgdChunk chunk)
-		: base(chunk, "bKGD", "Background color", TreeViewIcon.Section)
+		: base(chunk, "bKGD", "Background color", TreeViewIcon.Properties)
 	{
 	}
 

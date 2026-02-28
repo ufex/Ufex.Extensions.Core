@@ -10,7 +10,7 @@ namespace Ufex.Extensions.Core.PNG.Structure;
 class ChrmChunkNode : ChunkNode
 {
 	public ChrmChunkNode(ChrmChunk chunk)
-		: base(chunk, "cHRM", "Primary chromaticities and white point", TreeViewIcon.Section)
+		: base(chunk, "cHRM", "Primary chromaticities and white point", TreeViewIcon.Properties)
 	{
 	}
 

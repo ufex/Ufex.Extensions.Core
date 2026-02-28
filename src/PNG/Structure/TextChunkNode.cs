@@ -10,18 +10,17 @@ namespace Ufex.Extensions.Core.PNG.Structure;
 class TextChunkNode : ChunkNode
 {
 	public TextChunkNode(TextChunk chunk)
-		: base(chunk, "tEXt", "Textual data", TreeViewIcon.Section)
+		: base(chunk, "tEXt", "Textual data", TreeViewIcon.Text)
 	{
 	}
 
 	public override object[][] GetRows()
 	{
 		var d = (TextChunk)Chunk;
-		object[][] rows = [
+		return [
 			["Keyword", d.Keyword, d.KeywordString],
 			["Null Separator", d.NullSeparator],
 			["Text String", d.TextString, d.TextStringString],
 		];
-		return rows;
 	}
 }

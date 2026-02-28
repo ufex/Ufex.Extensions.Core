@@ -10,7 +10,7 @@ namespace Ufex.Extensions.Core.PNG.Structure;
 class SrgbChunkNode : ChunkNode
 {
 	public SrgbChunkNode(SrgbChunk chunk)
-		: base(chunk, "sRGB", "Standard RGB color space", TreeViewIcon.Section)
+		: base(chunk, "sRGB", "Standard RGB color space", TreeViewIcon.Properties)
 	{
 	}
 

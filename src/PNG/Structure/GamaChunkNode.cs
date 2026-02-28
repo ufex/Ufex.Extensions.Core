@@ -10,7 +10,7 @@ namespace Ufex.Extensions.Core.PNG.Structure;
 class GamaChunkNode : ChunkNode
 {
 	public GamaChunkNode(GamaChunk chunk)
-		: base(chunk, "gAMA", "Image gamma", TreeViewIcon.Section)
+		: base(chunk, "gAMA", "Image gamma", TreeViewIcon.Properties)
 	{
 	}
 

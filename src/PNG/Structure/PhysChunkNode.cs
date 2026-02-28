@@ -12,7 +12,7 @@ namespace Ufex.Extensions.Core.PNG.Structure;
 class PhysChunkNode : ChunkNode
 {
 	public PhysChunkNode(PhysChunk chunk) 
-		: base(chunk, "pHYs", "Physical pixel dimensions", TreeViewIcon.Section)
+		: base(chunk, "pHYs", "Physical pixel dimensions", TreeViewIcon.Properties)
 	{
 	}
 

@@ -11,7 +11,7 @@ namespace Ufex.Extensions.Core.PNG.Structure;
 class TrnsChunkNode : ChunkNode
 {
 	public TrnsChunkNode(TrnsChunk chunk)
-		: base(chunk, "tRNS", "Transparency", TreeViewIcon.Section)
+		: base(chunk, "tRNS", "Transparency", TreeViewIcon.Properties)
 	{
 	}
 

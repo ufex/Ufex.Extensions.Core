@@ -10,14 +10,14 @@ namespace Ufex.Extensions.Core.PNG.Structure;
 class ItxtChunkNode : ChunkNode
 {
 	public ItxtChunkNode(ItxtChunk chunk)
-		: base(chunk, "iTXt", "International textual data", TreeViewIcon.Section)
+		: base(chunk, "iTXt", "International textual data", TreeViewIcon.Text)
 	{
 	}
 
 	public override object[][] GetRows()
 	{
 		var d = (ItxtChunk)Chunk;
-		object[][] rows = [
+		return [
 			["Keyword", d.Keyword],
 			["Language Tag", d.LanguageTag],
 			["Translated Keyword", d.TranslatedKeyword],
@@ -25,6 +25,5 @@ class ItxtChunkNode : ChunkNode
 			["Compression Method", d.CompressionMethod, d.CompressionMethod == 0 ? "Deflate" : "Unknown"],
 			["Text", d.Text],
 		];
-		return rows;
 	}
 }

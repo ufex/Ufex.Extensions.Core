@@ -10,7 +10,7 @@ namespace Ufex.Extensions.Core.PNG.Structure;
 class IdatChunkNode : ChunkNode
 {
 	public IdatChunkNode(IdatChunk chunk)
-		: base(chunk, "IDAT", "Image data", TreeViewIcon.Section)
+		: base(chunk, "IDAT", "Image data", TreeViewIcon.Binary)
 	{
 	}
 }

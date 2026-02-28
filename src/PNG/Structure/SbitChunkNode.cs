@@ -10,7 +10,7 @@ namespace Ufex.Extensions.Core.PNG.Structure;
 class SbitChunkNode : ChunkNode
 {
 	public SbitChunkNode(SbitChunk chunk)
-		: base(chunk, "sBIT", "Significant bits", TreeViewIcon.Section)
+		: base(chunk, "sBIT", "Significant bits", TreeViewIcon.Properties)
 	{
 	}
 }

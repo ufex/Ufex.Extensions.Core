@@ -12,18 +12,17 @@ namespace Ufex.Extensions.Core.PNG.Structure;
 class SpltChunkNode : ChunkNode
 {
 	public SpltChunkNode(SpltChunk chunk) 
-		: base(chunk, "sPLT", "Suggested palette", TreeViewIcon.Section)
+		: base(chunk, "sPLT", "Suggested palette", TreeViewIcon.Palette)
 	{
 	}
 
 	public override object[][] GetRows()
 	{
 		var d = (SpltChunk)Chunk;
-		object[][] rows = [
+		return [
 			["Palette name", d.PaletteName],
 			["Sample depth", d.SampleDepth],
 		];
-		return rows;
 	}
 }
 

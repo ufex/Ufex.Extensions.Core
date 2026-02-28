@@ -12,7 +12,7 @@ namespace Ufex.Extensions.Core.PNG.Structure;
 class HistChunkNode : ChunkNode
 {
 	public HistChunkNode(HistChunk chunk) 
-		: base(chunk, "hIST", "Image histogram", TreeViewIcon.Section)
+		: base(chunk, "hIST", "Image histogram", TreeViewIcon.Table)
 	{
 	}
 

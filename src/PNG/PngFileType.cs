@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
-using Microsoft.Extensions.Logging;
 
 using Ufex.API;
 using Ufex.API.Tables;
@@ -215,7 +214,7 @@ public class PngFileType : FileType
 	{
 		foreach(Chunk chunk in pngReader.Chunks)
 		{
-			Log.LogInformation($"Processing chunk at position {chunk.Offset}, type {chunk.GetType().Name}");
+			Log.Info($"Processing chunk at position {chunk.Offset}, type {chunk.GetType().Name}");
 			ChunkNode node = ChunkNode.FromChunk(chunk);
 			TreeNodes.Add(node);
 		}

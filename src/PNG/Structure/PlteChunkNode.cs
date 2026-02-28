@@ -11,7 +11,7 @@ namespace Ufex.Extensions.Core.PNG.Structure;
 class PlteChunkNode : ChunkNode
 {
 	public PlteChunkNode(PlteChunk chunk)
-		: base(chunk, "PLTE", "Palette", TreeViewIcon.Section)
+		: base(chunk, "PLTE", "Palette", TreeViewIcon.Palette)
 	{
 	}
 
