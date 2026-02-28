@@ -1,5 +1,3 @@
-using Microsoft.Extensions.Logging;
-
 using Ufex.API;
 using Ufex.API.Validation;
 
@@ -81,7 +79,7 @@ public class GifStreamReader
 
 		// Read Header
 		Header = new Header(fr);
-		Log.LogInformation($"Read GIF header: {Header.Signature}{Header.Version}");
+		Log.Info($"Read GIF header: {Header.Signature}{Header.Version}");
 
 		// Validate signature
 		if (Header.Signature != "GIF")
@@ -98,13 +96,13 @@ public class GifStreamReader
 
 		// Read Logical Screen Descriptor
 		LogicalScreenDescriptor = new LogicalScreenDescriptor(fr);
-		Log.LogInformation($"Logical Screen: {LogicalScreenDescriptor.Width}x{LogicalScreenDescriptor.Height}");
+		Log.Info($"Logical Screen: {LogicalScreenDescriptor.Width}x{LogicalScreenDescriptor.Height}");
 
 		// Read Global Color Table if present
 		if (LogicalScreenDescriptor.GlobalColorTableFlag)
 		{
 			GlobalColorTable = new ColorTable(fr, LogicalScreenDescriptor.SizeOfGlobalColorTable);
-			Log.LogInformation($"Global Color Table: {GlobalColorTable.ColorCount} colors");
+			Log.Info($"Global Color Table: {GlobalColorTable.ColorCount} colors");
 		}
 
 		// Read blocks until trailer
@@ -117,7 +115,7 @@ public class GifStreamReader
 			if (blockType == Constants.BLOCK_TRAILER)
 			{
 				// End of GIF
-				Log.LogInformation("Read GIF trailer");
+				Log.Info("Read GIF trailer");
 				break;
 			}
 			else if (blockType == Constants.BLOCK_EXTENSION)
@@ -131,24 +129,24 @@ public class GifStreamReader
 				{
 					case Constants.EXT_GRAPHIC_CONTROL:
 						pendingGraphicControl = new GraphicControlExtension(fr);
-						Log.LogInformation($"Graphic Control Extension: delay={pendingGraphicControl.DelayTime}");
+						Log.Info($"Graphic Control Extension: delay={pendingGraphicControl.DelayTime}");
 						break;
 
 					case Constants.EXT_APPLICATION:
 						var appExt = new ApplicationExtension(fr);
 						ApplicationExtensions.Add(appExt);
-						Log.LogInformation($"Application Extension: {appExt.ApplicationIdentifierString}");
+						Log.Info($"Application Extension: {appExt.ApplicationIdentifierString}");
 						break;
 
 					case Constants.EXT_COMMENT:
 						var commentExt = new CommentExtension(fr);
 						CommentExtensions.Add(commentExt);
-						Log.LogInformation($"Comment Extension: {commentExt.CommentText.Length} chars");
+						Log.Info($"Comment Extension: {commentExt.CommentText.Length} chars");
 						break;
 
 					case Constants.EXT_PLAIN_TEXT:
 						var plainTextExt = new PlainTextExtension(fr);
-						Log.LogInformation($"Plain Text Extension: {plainTextExt.TextContent.Length} chars");
+						Log.Info($"Plain Text Extension: {plainTextExt.TextContent.Length} chars");
 						break;
 
 					default:
@@ -165,7 +163,7 @@ public class GifStreamReader
 
 				var frame = ReadFrame(fr, pendingGraphicControl);
 				Frames.Add(frame);
-				Log.LogInformation($"Frame {frame.FrameIndex}: {frame.ImageDescriptor.Width}x{frame.ImageDescriptor.Height}");
+				Log.Info($"Frame {frame.FrameIndex}: {frame.ImageDescriptor.Width}x{frame.ImageDescriptor.Height}");
 
 				pendingGraphicControl = null;
 			}
@@ -178,7 +176,7 @@ public class GifStreamReader
 		}
 
 		IsValid = true;
-		Log.LogInformation($"GIF parsed: {Frames.Count} frames");
+		Log.Info($"GIF parsed: {Frames.Count} frames");
 		return true;
 	}
 

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Extensions.Logging;
+
 using Ufex.API;
 using Ufex.API.Validation;
 using Ufex.Extensions.Core.PDF.Data;
@@ -17,7 +17,7 @@ internal class PdfStreamReader
 	private readonly byte[] _data;
 	private readonly PdfTokenizer _tokenizer;
 	private readonly PdfParser _parser;
-	private readonly ILogger _logger;
+	private readonly Logger _logger;
 	private readonly ValidationReport _validationReport;
 
 	/// <summary>Parsed file header</summary>
@@ -50,7 +50,7 @@ internal class PdfStreamReader
 	/// <summary>Document info metadata</summary>
 	public Dictionary<string, string> Metadata { get; } = new();
 
-	public PdfStreamReader(byte[] data, ILogger logger, ValidationReport validationReport)
+	public PdfStreamReader(byte[] data, Logger logger, ValidationReport validationReport)
 	{
 		_data = data;
 		_tokenizer = new PdfTokenizer(data);
@@ -69,15 +69,15 @@ internal class PdfStreamReader
 		try
 		{
 			// 1. Parse header
-			_logger.LogInformation("Parsing PDF header");
+			_logger.Info("Parsing PDF header");
 			Header = _parser.ParseHeader();
-			_logger.LogInformation("PDF version {Version}", Header.VersionString);
+			_logger.Info("PDF version {Version}", Header.VersionString);
 
 			// 2. Find startxref
-			_logger.LogInformation("Finding startxref");
+			_logger.Info("Finding startxref");
 			StartXRefOffset = _parser.FindStartXRef();
 			XRefOffset = StartXRefOffset;
-			_logger.LogInformation("startxref at offset {Offset}", StartXRefOffset);
+			_logger.Info("startxref at offset {Offset}", StartXRefOffset);
 
 			// 3. Parse cross-reference section (table or stream)
 			ParseXRefSection(StartXRefOffset);
@@ -95,7 +95,7 @@ internal class PdfStreamReader
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "Error reading PDF file");
+			_logger.Error(ex, "Error reading PDF file");
 			_validationReport.Error($"Error reading PDF: {ex.Message}");
 			return false;
 		}
@@ -111,7 +111,7 @@ internal class PdfStreamReader
 		while (offset >= 0 && !visitedOffsets.Contains(offset))
 		{
 			visitedOffsets.Add(offset);
-			_logger.LogInformation("Parsing xref section at offset {Offset}", offset);
+			_logger.Info("Parsing xref section at offset {Offset}", offset);
 
 			List<XRefEntry> entries;
 			PdfDictionary trailerDict;
@@ -120,12 +120,12 @@ internal class PdfStreamReader
 			{
 				UsesXRefStream = true;
 				(entries, trailerDict) = _parser.ParseXRefStream(offset);
-				_logger.LogInformation("Xref stream: {Count} entries", entries.Count);
+				_logger.Info("Xref stream: {Count} entries", entries.Count);
 			}
 			else
 			{
 				(entries, trailerDict) = _parser.ParseXRefTable(offset);
-				_logger.LogInformation("Xref table: {Count} entries", entries.Count);
+				_logger.Info("Xref table: {Count} entries", entries.Count);
 			}
 
 			// Add entries that don't already exist (later entries take precedence)
@@ -151,7 +151,7 @@ internal class PdfStreamReader
 			long? prev = trailerDict.GetInteger("Prev");
 			if (prev.HasValue && prev.Value > 0)
 			{
-				_logger.LogInformation("Following /Prev to offset {Offset}", prev.Value);
+				_logger.Info("Following /Prev to offset {Offset}", prev.Value);
 				offset = prev.Value;
 			}
 			else
@@ -179,12 +179,12 @@ internal class PdfStreamReader
 			{
 				var obj = _parser.ParseIndirectObjectAt(entry.Offset);
 				Objects[obj.ObjectNumber] = obj;
-				_logger.LogDebug("Parsed object {ObjNum} {Gen} ({Type}) at offset {Offset}",
+				_logger.Debug("Parsed object {ObjNum} {Gen} ({Type}) at offset {Offset}",
 					obj.ObjectNumber, obj.Generation, obj.DisplayName, entry.Offset);
 			}
 			catch (Exception ex)
 			{
-				_logger.LogWarning("Failed to parse object {ObjNum} at offset {Offset}: {Error}",
+				_logger.Warning("Failed to parse object {ObjNum} at offset {Offset}: {Error}",
 					entry.ObjectNumber, entry.Offset, ex.Message);
 				_validationReport.Warning($"Failed to parse object {entry.ObjectNumber} at offset {entry.Offset}: {ex.Message}");
 			}
@@ -250,13 +250,13 @@ internal class PdfStreamReader
 					}
 					catch (Exception ex)
 					{
-						_logger.LogDebug("Failed to parse compressed object {ObjNum}: {Error}", objNum, ex.Message);
+						_logger.Debug("Failed to parse compressed object {ObjNum}: {Error}", objNum, ex.Message);
 					}
 				}
 			}
 			catch (Exception ex)
 			{
-				_logger.LogWarning("Failed to parse object stream {ObjNum}: {Error}", streamObjNum, ex.Message);
+				_logger.Warning("Failed to parse object stream {ObjNum}: {Error}", streamObjNum, ex.Message);
 			}
 		}
 	}

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
-using Microsoft.Extensions.Logging;
 
 using Ufex.API;
 using Ufex.API.Tables;
@@ -51,7 +50,7 @@ public class RiffStreamReader
 				return false;
 			}
 			byte[] chunkFormat = fr.ReadBytes(4);
-			Log.LogInformation($"Reading chunk of type: {System.Text.Encoding.ASCII.GetString(chunkID)} with length: {size}");
+			Log.Info($"Reading chunk of type: {System.Text.Encoding.ASCII.GetString(chunkID)} with length: {size}");
 
 			// Rewind, so the chunk constructor can read the full chunk data
 			_fileStream.Seek(-12, SeekOrigin.Current);
@@ -67,12 +66,12 @@ public class RiffStreamReader
 			long adjustment = size - (endPos - startPos);
 			if(adjustment > 0)
 			{
-				Log.LogInformation($"Adjusting stream position by {adjustment} bytes for chunk type {System.Text.Encoding.ASCII.GetString(chunkID)}");
+				Log.Info($"Adjusting stream position by {adjustment} bytes for chunk type {System.Text.Encoding.ASCII.GetString(chunkID)}");
 				_fileStream.Seek(adjustment, SeekOrigin.Current);
 			}
 
 			Chunks.Add(newChunk);
-			Log.LogInformation($"Position = {_fileStream.Position}");
+			Log.Info($"Position = {_fileStream.Position}");
 		}
 
 		return true;

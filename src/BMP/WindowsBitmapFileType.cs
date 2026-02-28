@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Microsoft.Extensions.Logging;
 
 using Ufex.API;
 using Ufex.API.Visual;
@@ -111,6 +110,7 @@ public class WindowsBitmapFileType : FileType
 
 		var fileMap = new FileMap(spans.ToArray(), (ulong)FileInStream.Length);
 		VisualsList.Add(fileMap);
+		VisualsList.Add(new RasterImage(FileInStream));
 	}
 
 	private void BuildStructure(BmpStreamReader reader)

@@ -1,5 +1,3 @@
-using Microsoft.Extensions.Logging;
-
 using Ufex.API;
 using Ufex.API.Validation;
 using Ufex.Extensions.Core.BMP.Data;
@@ -54,7 +52,7 @@ public class BmpStreamReader
 
 		// Read File Header (14 bytes)
 		FileHeader = new BitmapFileHeader(fr);
-		Log.LogInformation($"Read BitmapFileHeader at offset {FileHeader.Offset}");
+		Log.Info($"Read BitmapFileHeader at offset {FileHeader.Offset}");
 
 		// Validate signature
 		if (FileHeader.Type != Signatures.BMP_SIGNATURE)
@@ -79,7 +77,7 @@ public class BmpStreamReader
 		uint infoHeaderSize = fr.ReadUInt32();
 		_fileStream.Seek(-4, SeekOrigin.Current);
 
-		Log.LogInformation($"Info header size: {infoHeaderSize} bytes");
+		Log.Info($"Info header size: {infoHeaderSize} bytes");
 
 		InfoHeader = infoHeaderSize switch
 		{
@@ -89,14 +87,14 @@ public class BmpStreamReader
 			_ => throw new Exception($"Unsupported bitmap header size: {infoHeaderSize}")
 		};
 
-		Log.LogInformation($"Read {InfoHeader.GetType().Name} at offset {InfoHeader.Offset}");
+		Log.Info($"Read {InfoHeader.GetType().Name} at offset {InfoHeader.Offset}");
 
 		// Validate info header
 		ValidateInfoHeader();
 
 		// Calculate number of colors in color table
 		uint numColors = CalculateColorCount();
-		Log.LogInformation($"Color table size: {numColors} entries");
+		Log.Info($"Color table size: {numColors} entries");
 
 		// Read color table if present
 		if (numColors > 0)
@@ -111,7 +109,7 @@ public class BmpStreamReader
 			}
 
 			ColorTable = new ColorTable(fr, numColors);
-			Log.LogInformation($"Read ColorTable with {ColorTable.Count} entries at offset {ColorTable.Offset}");
+			Log.Info($"Read ColorTable with {ColorTable.Count} entries at offset {ColorTable.Offset}");
 
 			if (ColorTable.InvalidReservedCount > 0)
 			{

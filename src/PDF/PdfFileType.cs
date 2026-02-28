@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Extensions.Logging;
+
 using Ufex.API;
 using Ufex.API.Tables;
 using Ufex.API.Visual;
@@ -36,12 +36,12 @@ public class PdfFileType : FileType
 			bytesRead += read;
 		}
 
-		var reader = new PdfStreamReader(data, Logger, ValidationReport);
+		var reader = new PdfStreamReader(data, Log, ValidationReport);
 		bool result = reader.Read();
 
 		if (!result)
 		{
-			Logger.LogError("Failed to parse PDF file");
+			Log.Error("Failed to parse PDF file");
 			return false;
 		}
 

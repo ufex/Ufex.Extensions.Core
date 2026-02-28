@@ -1,5 +1,3 @@
-using Microsoft.Extensions.Logging;
-
 using Ufex.API;
 using Ufex.API.Tables;
 using Ufex.API.Visual;

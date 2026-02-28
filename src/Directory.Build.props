@@ -7,8 +7,8 @@
     <Company>Ufex</Company>
     <Product>Universal File Explorer</Product>
     <Copyright>Copyright (C) Ed Potocko 2005 - 2026</Copyright>
-    <!-- Disable auto-generated assembly info to avoid conflicts with legacy AssemblyInfo.cs files -->
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <!-- Enable generated assembly info so plugin version metadata from .csproj is embedded in DLLs -->
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
   </PropertyGroup>
 
   <!-- Common project reference to Ufex.API -->
