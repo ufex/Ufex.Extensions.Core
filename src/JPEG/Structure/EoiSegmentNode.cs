@@ -9,7 +9,7 @@ namespace Ufex.Extensions.Core.JPEG.Structure;
 internal class EoiSegmentNode : SegmentNode
 {
 	public EoiSegmentNode(EoiSegment segment)
-		: base(segment, "EOI", "End of Image", TreeViewIcon.Section)
+		: base(segment, "EOI", "End of Image", TreeViewIcon.Footer)
 	{
 	}
 }

@@ -8,7 +8,7 @@ namespace Ufex.Extensions.Core.ZIP.Structure;
 internal class EndOfCentralDirectoryRecordNode : SectionNode
 {
 	public EndOfCentralDirectoryRecordNode(EndOfCentralDirectoryRecord record)
-		: base(record, "End of Central Directory Record", TreeViewIcon.Header)
+		: base(record, "End of Central Directory Record", TreeViewIcon.Footer)
 	{
 	}
 

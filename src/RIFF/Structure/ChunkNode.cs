@@ -39,7 +39,7 @@ internal class ChunkNode : TreeNode
 	}
 
 	public ChunkNode(Chunk chunk, string chunkType, string chunkDescription, TreeViewIcon icon) 
-		: base(chunkType + " (" + chunk.GetType().Name + ")", icon, icon)
+		: base(chunkType, icon, icon)
 	{
 		_chunk = chunk;
 		Description = chunkType + " - " + chunkDescription;

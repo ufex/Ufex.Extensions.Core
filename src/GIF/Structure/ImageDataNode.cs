@@ -11,7 +11,7 @@ internal class ImageDataNode : BlockNode
 	private readonly TableBasedImageData _imageData;
 
 	public ImageDataNode(TableBasedImageData imageData)
-		: base("Image Data", TreeViewIcon.Binary, imageData.Offset)
+		: base("Image Data", TreeViewIcon.Image, imageData.Offset)
 	{
 		_imageData = imageData;
 	}
