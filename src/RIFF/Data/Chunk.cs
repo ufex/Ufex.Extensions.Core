@@ -26,7 +26,8 @@ internal class Chunk
 	/// </summary>
 	private static readonly Dictionary<string, Type> RIFF_CHUNK_TYPES = new()
 	{
-		{ "WAVE", typeof(Data.Wave.WaveRiffChunk) }
+		{ "WAVE", typeof(Data.Wave.WaveRiffChunk) },
+		{ "WEBP", typeof(Data.WebP.WebPRiffChunk) }
 	};
 
 	/// <summary>

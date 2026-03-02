@@ -82,6 +82,14 @@
 			</FileTypes>
 		</FileTypeClass>
 		<FileTypeClass>
+			<ID>FTMD_WEBP</ID>
+			<AssemblyPath>RIFF.dll</AssemblyPath>
+			<FullTypeName>Ufex.Extensions.Core.RIFF.RiffFileType</FullTypeName>
+			<FileTypes>
+				<ID>GRPH_WEBP</ID>
+			</FileTypes>
+		</FileTypeClass>
+		<FileTypeClass>
 			<ID>FTMD_PDF</ID>
 			<AssemblyPath>PDF.dll</AssemblyPath>
 			<FullTypeName>Ufex.Extensions.Core.PDF.PdfFileType</FullTypeName>

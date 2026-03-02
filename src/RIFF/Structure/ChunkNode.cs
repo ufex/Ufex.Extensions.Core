@@ -26,7 +26,16 @@ internal class ChunkNode : TreeNode
 		{ typeof(RIFF.Data.Wave.InstChunk), typeof(Structure.Wave.InstChunkNode) },
 		{ typeof(RIFF.Data.Wave.LablChunk), typeof(Structure.Wave.LablChunkNode) },
 		{ typeof(RIFF.Data.Wave.NoteChunk), typeof(Structure.Wave.NoteChunkNode) },
-		{ typeof(RIFF.Data.Wave.LtxtChunk), typeof(Structure.Wave.LtxtChunkNode) }
+		{ typeof(RIFF.Data.Wave.LtxtChunk), typeof(Structure.Wave.LtxtChunkNode) },
+		{ typeof(RIFF.Data.WebP.Vp8xChunk), typeof(Structure.WebP.Vp8xChunkNode) },
+		{ typeof(RIFF.Data.WebP.Vp8Chunk), typeof(Structure.WebP.Vp8ChunkNode) },
+		{ typeof(RIFF.Data.WebP.Vp8lChunk), typeof(Structure.WebP.Vp8lChunkNode) },
+		{ typeof(RIFF.Data.WebP.AnimChunk), typeof(Structure.WebP.AnimChunkNode) },
+		{ typeof(RIFF.Data.WebP.AnmfChunk), typeof(Structure.WebP.AnmfChunkNode) },
+		{ typeof(RIFF.Data.WebP.AlphChunk), typeof(Structure.WebP.AlphChunkNode) },
+		{ typeof(RIFF.Data.WebP.IccpChunk), typeof(Structure.WebP.IccpChunkNode) },
+		{ typeof(RIFF.Data.WebP.ExifChunk), typeof(Structure.WebP.ExifChunkNode) },
+		{ typeof(RIFF.Data.WebP.XmpChunk), typeof(Structure.WebP.XmpChunkNode) }
 	};
 
 	protected Chunk _chunk;

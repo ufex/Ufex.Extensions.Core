@@ -38,7 +38,7 @@ public class RiffFileType : FileType
 		BuildVisuals(riffReader);
 		BuildStructure(riffReader);
 
-		return true;
+		return result;
 	}
 
 	public void BuildQuickInfo(RiffStreamReader riffReader)
