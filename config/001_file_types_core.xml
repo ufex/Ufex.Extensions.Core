@@ -78,7 +78,7 @@
 			<AssemblyPath>RIFF.dll</AssemblyPath>
 			<FullTypeName>Ufex.Extensions.Core.RIFF.RiffFileType</FullTypeName>
 			<FileTypes>
-				<ID>AUDI_WAVE</ID>
+				<ID>AUDIO_WAVE</ID>
 			</FileTypes>
 		</FileTypeClass>
 		<FileTypeClass>
@@ -95,6 +95,16 @@
 			<FullTypeName>Ufex.Extensions.Core.PDF.PdfFileType</FullTypeName>
 			<FileTypes>
 				<ID>DOCS_PORTDOCFORM</ID>
+			</FileTypes>
+		</FileTypeClass>
+		<FileTypeClass>
+			<ID>FTMD_OOXML</ID>
+			<AssemblyPath>OPC.dll</AssemblyPath>
+			<FullTypeName>Ufex.Extensions.Core.OPC.OoxmlFileType</FullTypeName>
+			<FileTypes>
+				<ID>DOCS_MS_DOCX</ID>
+				<ID>DOCS_MS_XLSX</ID>
+				<ID>DOCS_MS_PPTX</ID>
 			</FileTypes>
 		</FileTypeClass>
 	</FileTypeClasses>
