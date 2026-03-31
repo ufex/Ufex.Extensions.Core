@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 using Ufex.API;
@@ -14,7 +15,7 @@ namespace Ufex.Extensions.Core.PDF;
 /// </summary>
 internal class PdfStreamReader
 {
-	private readonly byte[] _data;
+	private readonly Stream _stream;
 	private readonly PdfTokenizer _tokenizer;
 	private readonly PdfParser _parser;
 	private readonly Logger _logger;
@@ -42,7 +43,7 @@ internal class PdfStreamReader
 	public bool UsesXRefStream { get; private set; }
 
 	/// <summary>Total file size in bytes</summary>
-	public long FileSize => _data.Length;
+	public long FileSize { get; }
 
 	/// <summary>Number of pages in the document (from the page tree)</summary>
 	public int PageCount { get; private set; }
@@ -50,10 +51,11 @@ internal class PdfStreamReader
 	/// <summary>Document info metadata</summary>
 	public Dictionary<string, string> Metadata { get; } = new();
 
-	public PdfStreamReader(byte[] data, Logger logger, ValidationReport validationReport)
+	public PdfStreamReader(Stream stream, Logger logger, ValidationReport validationReport)
 	{
-		_data = data;
-		_tokenizer = new PdfTokenizer(data);
+		_stream = stream;
+		FileSize = stream.Length;
+		_tokenizer = new PdfTokenizer(stream);
 		_parser = new PdfParser(_tokenizer);
 		_logger = logger;
 		_validationReport = validationReport;
@@ -219,7 +221,7 @@ internal class PdfStreamReader
 				int first = (int)(objStream.Dict.GetInteger("First") ?? 0);
 
 				// Parse header region: pairs of (objNum offset)
-				var headerTokenizer = new PdfTokenizer(decoded);
+				var headerTokenizer = new PdfTokenizer(new MemoryStream(decoded));
 				var headerParser = new PdfParser(headerTokenizer);
 				var objEntries = new List<(int ObjNum, int Offset)>();
 
@@ -238,7 +240,7 @@ internal class PdfStreamReader
 
 					try
 					{
-						var innerTokenizer = new PdfTokenizer(decoded);
+						var innerTokenizer = new PdfTokenizer(new MemoryStream(decoded));
 						var innerParser = new PdfParser(innerTokenizer);
 						innerTokenizer.Position = first + off;
 						var value = innerParser.ParseObject();

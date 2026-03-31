@@ -18,25 +18,15 @@ public class PdfFileType : FileType
 {
 	public PdfFileType()
 	{
-		ShowTechnical = true;
-		ShowGraphic = false;
-		ShowFileCheck = true;
+		EnableStructure = true;
+		EnableVisual = false;
+		EnableValidation = true;
 	}
 
 	public override bool ProcessFile()
 	{
-		// Read entire file into byte array for random-access parsing
 		FileInStream.Position = 0;
-		byte[] data = new byte[FileInStream.Length];
-		int bytesRead = 0;
-		while (bytesRead < data.Length)
-		{
-			int read = FileInStream.Read(data, bytesRead, data.Length - bytesRead);
-			if (read == 0) break;
-			bytesRead += read;
-		}
-
-		var reader = new PdfStreamReader(data, Log, ValidationReport);
+		var reader = new PdfStreamReader(FileInStream, Log, ValidationReport);
 		bool result = reader.Read();
 
 		if (!result)

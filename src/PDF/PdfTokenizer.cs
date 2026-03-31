@@ -1,3 +1,4 @@
+using System.IO;
 using System.Text;
 
 namespace Ufex.Extensions.Core.PDF;
@@ -61,31 +62,62 @@ internal readonly struct PdfToken
 }
 
 /// <summary>
-/// Low-level PDF tokenizer/lexer. Operates on a byte array with a movable position cursor.
+/// Low-level PDF tokenizer/lexer. Operates on a stream with a movable position cursor.
+/// Uses an internal cache for efficient sequential byte access.
 /// Handles PDF whitespace, comments, names, strings, hex strings, numbers, keywords, and delimiters.
 /// </summary>
 internal class PdfTokenizer
 {
-	private readonly byte[] _data;
+	private readonly Stream _stream;
+	private readonly int _length;
 	private int _pos;
+
+	// Internal read-ahead cache for efficient byte access
+	private const int CacheSize = 65536;
+	private readonly byte[] _cache = new byte[CacheSize];
+	private int _cacheStart = -1;
+	private int _cacheLen = 0;
 
 	/// <summary>Current position in the byte array</summary>
 	public int Position
 	{
 		get => _pos;
-		set => _pos = Math.Clamp(value, 0, _data.Length);
+		set => _pos = Math.Clamp(value, 0, _length);
 	}
 
 	/// <summary>Total length of data</summary>
-	public int Length => _data.Length;
+	public int Length => _length;
 
 	/// <summary>Whether the current position is at or past the end of data</summary>
-	public bool IsEof => _pos >= _data.Length;
+	public bool IsEof => _pos >= _length;
 
-	public PdfTokenizer(byte[] data)
+	public PdfTokenizer(Stream stream)
 	{
-		_data = data;
+		_stream = stream;
+		_length = (int)stream.Length;
 		_pos = 0;
+	}
+
+	/// <summary>
+	/// Fills the internal cache starting near the given position.
+	/// </summary>
+	private void FillCache(int position)
+	{
+		// Start slightly before the requested position for small lookback support
+		_cacheStart = Math.Max(0, position - 256);
+		_stream.Position = _cacheStart;
+		_cacheLen = _stream.Read(_cache, 0, CacheSize);
+	}
+
+	/// <summary>
+	/// Returns the byte at the given absolute position without advancing _pos.
+	/// </summary>
+	private byte At(int position)
+	{
+		if (position < 0 || position >= _length) return 0;
+		if (position < _cacheStart || position >= _cacheStart + _cacheLen)
+			FillCache(position);
+		return _cache[position - _cacheStart];
 	}
 
 	/// <summary>
@@ -95,9 +127,9 @@ internal class PdfTokenizer
 	/// </summary>
 	public void SkipWhitespaceAndComments()
 	{
-		while (_pos < _data.Length)
+		while (_pos < _length)
 		{
-			byte b = _data[_pos];
+			byte b = At(_pos);
 			if (IsWhitespace(b))
 			{
 				_pos++;
@@ -106,7 +138,7 @@ internal class PdfTokenizer
 			{
 				// Skip comment to end of line
 				_pos++;
-				while (_pos < _data.Length && _data[_pos] != 10 && _data[_pos] != 13)
+				while (_pos < _length && At(_pos) != 10 && At(_pos) != 13)
 					_pos++;
 			}
 			else
@@ -123,11 +155,11 @@ internal class PdfTokenizer
 	{
 		SkipWhitespaceAndComments();
 
-		if (_pos >= _data.Length)
+		if (_pos >= _length)
 			return new PdfToken(PdfTokenType.Eof, "", _pos);
 
 		long tokenStart = _pos;
-		byte b = _data[_pos];
+		byte b = At(_pos);
 
 		// Name: /something
 		if (b == (byte)'/')
@@ -140,7 +172,7 @@ internal class PdfTokenizer
 		// Hex string or dict delimiter: < or <<
 		if (b == (byte)'<')
 		{
-			if (_pos + 1 < _data.Length && _data[_pos + 1] == (byte)'<')
+			if (_pos + 1 < _length && At(_pos + 1) == (byte)'<')
 			{
 				_pos += 2;
 				return new PdfToken(PdfTokenType.DictBegin, "<<", tokenStart);
@@ -151,7 +183,7 @@ internal class PdfTokenizer
 		// Dict end: >>
 		if (b == (byte)'>')
 		{
-			if (_pos + 1 < _data.Length && _data[_pos + 1] == (byte)'>')
+			if (_pos + 1 < _length && At(_pos + 1) == (byte)'>')
 			{
 				_pos += 2;
 				return new PdfToken(PdfTokenType.DictEnd, ">>", tokenStart);
@@ -174,7 +206,7 @@ internal class PdfTokenizer
 		}
 
 		// Number: +, -, digit, or .digit
-		if (b == (byte)'+' || b == (byte)'-' || IsDigit(b) || (b == (byte)'.' && _pos + 1 < _data.Length && IsDigit(_data[_pos + 1])))
+		if (b == (byte)'+' || b == (byte)'-' || IsDigit(b) || (b == (byte)'.' && _pos + 1 < _length && IsDigit(At(_pos + 1))))
 			return ReadNumber(tokenStart);
 
 		// Regular characters → keyword
@@ -200,22 +232,31 @@ internal class PdfTokenizer
 	/// <summary>
 	/// Reads the current byte without advancing.
 	/// </summary>
-	public byte? PeekByte() => _pos < _data.Length ? _data[_pos] : null;
+	public byte? PeekByte() => _pos < _length ? At(_pos) : null;
 
 	/// <summary>
 	/// Reads a single byte and advances position.
 	/// </summary>
-	public byte ReadByte() => _data[_pos++];
+	public byte ReadByte() => At(_pos++);
 
 	/// <summary>
 	/// Reads a range of bytes without advancing position.
 	/// </summary>
 	public byte[] GetBytes(int offset, int count)
 	{
-		count = Math.Min(count, _data.Length - offset);
+		count = Math.Min(count, _length - offset);
 		if (count <= 0) return [];
 		var result = new byte[count];
-		Array.Copy(_data, offset, result, 0, count);
+		_stream.Position = offset;
+		int totalRead = 0;
+		while (totalRead < count)
+		{
+			int read = _stream.Read(result, totalRead, count - totalRead);
+			if (read == 0) break;
+			totalRead += read;
+		}
+		if (totalRead < count)
+			Array.Resize(ref result, totalRead);
 		return result;
 	}
 
@@ -225,16 +266,16 @@ internal class PdfTokenizer
 	{
 		_pos++; // skip /
 		var sb = new StringBuilder();
-		while (_pos < _data.Length)
+		while (_pos < _length)
 		{
-			byte c = _data[_pos];
+			byte c = At(_pos);
 			if (IsWhitespace(c) || IsDelimiter(c))
 				break;
-			if (c == (byte)'#' && _pos + 2 < _data.Length)
+			if (c == (byte)'#' && _pos + 2 < _length)
 			{
 				// Hex-encoded byte: #XX
-				int hi = HexDigit(_data[_pos + 1]);
-				int lo = HexDigit(_data[_pos + 2]);
+				int hi = HexDigit(At(_pos + 1));
+				int lo = HexDigit(At(_pos + 2));
 				if (hi >= 0 && lo >= 0)
 				{
 					sb.Append((char)((hi << 4) | lo));
@@ -253,9 +294,9 @@ internal class PdfTokenizer
 		_pos++; // skip (
 		var bytes = new List<byte>();
 		int depth = 1;
-		while (_pos < _data.Length && depth > 0)
+		while (_pos < _length && depth > 0)
 		{
-			byte c = _data[_pos];
+			byte c = At(_pos);
 			if (c == (byte)'(')
 			{
 				depth++;
@@ -274,8 +315,8 @@ internal class PdfTokenizer
 			else if (c == (byte)'\\')
 			{
 				_pos++;
-				if (_pos >= _data.Length) break;
-				byte escaped = _data[_pos];
+				if (_pos >= _length) break;
+				byte escaped = At(_pos);
 				switch (escaped)
 				{
 					case (byte)'n': bytes.Add(10); _pos++; break;
@@ -288,7 +329,7 @@ internal class PdfTokenizer
 					case (byte)'\\': bytes.Add((byte)'\\'); _pos++; break;
 					case 13: // \CR or \CRLF → line continuation
 						_pos++;
-						if (_pos < _data.Length && _data[_pos] == 10)
+						if (_pos < _length && At(_pos) == 10)
 							_pos++;
 						break;
 					case 10: // \LF → line continuation
@@ -300,13 +341,13 @@ internal class PdfTokenizer
 						{
 							int octal = escaped - '0';
 							_pos++;
-							if (_pos < _data.Length && _data[_pos] >= (byte)'0' && _data[_pos] <= (byte)'7')
+							if (_pos < _length && At(_pos) >= (byte)'0' && At(_pos) <= (byte)'7')
 							{
-								octal = (octal << 3) | (_data[_pos] - '0');
+								octal = (octal << 3) | (At(_pos) - '0');
 								_pos++;
-								if (_pos < _data.Length && _data[_pos] >= (byte)'0' && _data[_pos] <= (byte)'7')
+								if (_pos < _length && At(_pos) >= (byte)'0' && At(_pos) <= (byte)'7')
 								{
-									octal = (octal << 3) | (_data[_pos] - '0');
+									octal = (octal << 3) | (At(_pos) - '0');
 									_pos++;
 								}
 							}
@@ -334,9 +375,9 @@ internal class PdfTokenizer
 	{
 		_pos++; // skip <
 		var hexChars = new List<byte>();
-		while (_pos < _data.Length)
+		while (_pos < _length)
 		{
-			byte c = _data[_pos];
+			byte c = At(_pos);
 			if (c == (byte)'>')
 			{
 				_pos++;
@@ -368,15 +409,15 @@ internal class PdfTokenizer
 	private PdfToken ReadNumber(long tokenStart)
 	{
 		var sb = new StringBuilder();
-		if (_pos < _data.Length && (_data[_pos] == (byte)'+' || _data[_pos] == (byte)'-'))
+		if (_pos < _length && (At(_pos) == (byte)'+' || At(_pos) == (byte)'-'))
 		{
-			sb.Append((char)_data[_pos]);
+			sb.Append((char)At(_pos));
 			_pos++;
 		}
 		bool hasDot = false;
-		while (_pos < _data.Length)
+		while (_pos < _length)
 		{
-			byte c = _data[_pos];
+			byte c = At(_pos);
 			if (IsDigit(c))
 			{
 				sb.Append((char)c);
@@ -399,9 +440,9 @@ internal class PdfTokenizer
 	private PdfToken ReadKeyword(long tokenStart)
 	{
 		var sb = new StringBuilder();
-		while (_pos < _data.Length)
+		while (_pos < _length)
 		{
-			byte c = _data[_pos];
+			byte c = At(_pos);
 			if (IsWhitespace(c) || IsDelimiter(c))
 				break;
 			sb.Append((char)c);
@@ -420,20 +461,34 @@ internal class PdfTokenizer
 	/// </summary>
 	public int FindLastOccurrence(string target, int fromPos = -1)
 	{
-		if (fromPos < 0) fromPos = _data.Length - 1;
+		if (fromPos < 0) fromPos = _length - 1;
 		var targetBytes = Encoding.ASCII.GetBytes(target);
-		for (int i = Math.Min(fromPos, _data.Length - targetBytes.Length); i >= 0; i--)
+		int targetLen = targetBytes.Length;
+		int chunkSize = 4096;
+		int searchEnd = Math.Min(fromPos + targetLen, _length);
+
+		while (searchEnd > 0)
 		{
-			bool match = true;
-			for (int j = 0; j < targetBytes.Length; j++)
+			int chunkStart = Math.Max(0, searchEnd - chunkSize);
+			var chunk = GetBytes(chunkStart, searchEnd - chunkStart);
+
+			int maxI = Math.Min(chunk.Length - targetLen, fromPos - chunkStart);
+			for (int i = maxI; i >= 0; i--)
 			{
-				if (_data[i + j] != targetBytes[j])
+				bool match = true;
+				for (int j = 0; j < targetLen; j++)
 				{
-					match = false;
-					break;
+					if (chunk[i + j] != targetBytes[j])
+					{
+						match = false;
+						break;
+					}
 				}
+				if (match) return chunkStart + i;
 			}
-			if (match) return i;
+
+			searchEnd = chunkStart + targetLen - 1;
+			if (chunkStart == 0) break;
 		}
 		return -1;
 	}
@@ -445,13 +500,13 @@ internal class PdfTokenizer
 	public string ReadLine()
 	{
 		var sb = new StringBuilder();
-		while (_pos < _data.Length)
+		while (_pos < _length)
 		{
-			byte c = _data[_pos];
+			byte c = At(_pos);
 			if (c == 13) // CR
 			{
 				_pos++;
-				if (_pos < _data.Length && _data[_pos] == 10) // CRLF
+				if (_pos < _length && At(_pos) == 10) // CRLF
 					_pos++;
 				break;
 			}
@@ -472,9 +527,9 @@ internal class PdfTokenizer
 	public string ReadLineContent()
 	{
 		var sb = new StringBuilder();
-		while (_pos < _data.Length)
+		while (_pos < _length)
 		{
-			byte c = _data[_pos];
+			byte c = At(_pos);
 			if (c == 13 || c == 10)
 				break;
 			sb.Append((char)c);
@@ -488,9 +543,9 @@ internal class PdfTokenizer
 	/// </summary>
 	public void SkipEol()
 	{
-		if (_pos < _data.Length && _data[_pos] == 13)
+		if (_pos < _length && At(_pos) == 13)
 			_pos++;
-		if (_pos < _data.Length && _data[_pos] == 10)
+		if (_pos < _length && At(_pos) == 10)
 			_pos++;
 	}
 
