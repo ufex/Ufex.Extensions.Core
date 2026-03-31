@@ -4,7 +4,7 @@ using Ufex.API.Visual;
 
 namespace Ufex.Extensions.Core.ZIP.Structure;
 
-internal class DeflateBlockNode : TreeNode
+public class DeflateBlockNode : TreeNode
 {
 	public DeflateStreamReader.Block Block;
 

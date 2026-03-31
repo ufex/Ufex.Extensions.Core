@@ -5,7 +5,7 @@ using Ufex.Extensions.Core.ZIP.Data;
 
 namespace Ufex.Extensions.Core.ZIP.Structure;
 
-internal class DataDescriptorNode : SectionNode
+public class DataDescriptorNode : SectionNode
 {
 	public DataDescriptorNode(DataDescriptor dataDescriptor)
 		: base(dataDescriptor, "Data Descriptor", TreeViewIcon.Table)

@@ -3,7 +3,7 @@ using Ufex.Extensions.Core.ZIP.Data;
 
 namespace Ufex.Extensions.Core.ZIP.Structure;
 
-internal class CompressedFileNode : SectionNode
+public class CompressedFileNode : SectionNode
 {
 	public CompressedFileNode(CompressedFile compressedFile)
 		: base(compressedFile, compressedFile.Header.FileNameText, TreeViewIcon.Document)

@@ -4,7 +4,7 @@ using Ufex.API;
 
 namespace Ufex.Extensions.Core.ZIP.Data;
 
-internal class LocalFileHeader : Section
+public class LocalFileHeader : Section
 {
 	public UInt32 LocFileHeadSign { get; init; }
 	public UInt16 VersionToExtract { get; init; }

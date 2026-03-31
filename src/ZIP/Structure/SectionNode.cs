@@ -7,7 +7,7 @@ using Ufex.Extensions.Core.ZIP.Data;
 
 namespace Ufex.Extensions.Core.ZIP.Structure;
 
-internal class SectionNode : TreeNode
+public class SectionNode : TreeNode
 {
 	public Section Section;
 

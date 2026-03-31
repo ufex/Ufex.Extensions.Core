@@ -5,7 +5,7 @@ using Ufex.API.Validation;
 
 namespace Ufex.Extensions.Core.ZIP.Data;
 
-internal class DataDescriptor : Section
+public class DataDescriptor : Section
 {
 	public UInt32? DataDescriptorSignature { get; init; }
 	public UInt32 Crc32 { get; init; }

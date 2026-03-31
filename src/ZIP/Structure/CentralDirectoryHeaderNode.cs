@@ -5,7 +5,7 @@ using Ufex.Extensions.Core.ZIP.Data;
 
 namespace Ufex.Extensions.Core.ZIP.Structure;
 
-internal class CentralDirectoryHeaderNode : SectionNode
+public class CentralDirectoryHeaderNode : SectionNode
 {
 	public CentralDirectoryHeaderNode(CentralDirectoryHeader centralDirectoryHeader)
 		: base(centralDirectoryHeader, "Central Directory Header", TreeViewIcon.Header)

@@ -1,6 +1,6 @@
 namespace Ufex.Extensions.Core.ZIP.Data;
 
-internal static class Signatures
+public static class Signatures
 {
 	public const UInt32 LOCAL_FILE_SIGNATURE = 0x04034b50;
 	public const UInt32 CENTRAL_FILE_SIGNATURE = 0x02014b50;

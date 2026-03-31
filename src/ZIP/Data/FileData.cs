@@ -2,22 +2,24 @@
 using System;
 using System.IO;
 using Ufex.API;
-using Ufex.API.Validation;
 
 namespace Ufex.Extensions.Core.ZIP.Data;
 
-internal class FileData : Section
+public class FileData : Section
 {
 	private const int ChunkSize = 65536; // 64KB chunks
 	public UInt32 Crc32 { get; init; }
 
-	public List<DeflateStreamReader.Block>? Blocks { get; init; }
+	public UInt16 CompressionMethod { get; init; }
+
+	public List<DeflateStreamReader.Block>? Blocks { get; private set; }
 
 	public ulong CompressedSize { get; init; }
 
-	public FileData(BinaryReader br, ulong size, UInt16 compressionMethod, ValidationReport validationReport)
+	public FileData(BinaryReader br, ulong size, UInt16 compressionMethod)
 	{
 		CompressedSize = size;
+		CompressionMethod = compressionMethod;
 		StartRead(br);
 		
 		uint crc = 0xFFFFFFFF;
@@ -40,23 +42,20 @@ internal class FileData : Section
 		}
 		
 		Crc32 = crc ^ 0xFFFFFFFF;
-		EndRead(br);			
-		
-		if(compressionMethod == (ushort)CompressionMethod.Deflate && size > 0) // Deflate
-		{
-			// Reset stream position to the start of file data and read the blocks from the deflate stream
-			br.BaseStream.Position = StartPosition;
-			try 
-			{
-				Blocks = DeflateStreamReader.ReadBlocks(br.BaseStream);
-			}
-			catch(Exception ex)
-			{
-				validationReport.Error("Error reading Deflate blocks: " + ex.Message);
-				Blocks = new List<DeflateStreamReader.Block>();
-			}
-			br.BaseStream.Position = EndPosition;
-		}
+		EndRead(br);
+	}
+
+	/// <summary>
+	/// Reads the deflate block structure from the compressed data.
+	/// Call this on demand rather than during initial parse.
+	/// </summary>
+	public void ReadBlocks(Stream stream)
+	{
+		if (CompressionMethod != 8 || CompressedSize == 0) // 8 = Deflate
+			return;
+
+		stream.Position = StartPosition;
+		Blocks = DeflateStreamReader.ReadBlocks(stream);
 	}
 
 	// CRC32 lookup table (polynomial 0xEDB88320)

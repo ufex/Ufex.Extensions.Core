@@ -5,7 +5,7 @@ using Ufex.API.Validation;
 
 namespace Ufex.Extensions.Core.ZIP.Data;
 
-internal class Zip64EndOfCentralDirectoryRecord : Section
+public class Zip64EndOfCentralDirectoryRecord : Section
 {
 	public UInt32 EndOfCentralDirSignature { get; init; }
 	public UInt64 SizeOfRecord { get; init; }

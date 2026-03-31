@@ -5,7 +5,7 @@ using Ufex.API.Validation;
 
 namespace Ufex.Extensions.Core.ZIP.Data;
 
-internal class CentralDirectoryHeader : Section
+public class CentralDirectoryHeader : Section
 {
 	public UInt32 CentralFileHeaderSignature { get; init; }
 	public UInt16 VersionMadeBy { get; init; }

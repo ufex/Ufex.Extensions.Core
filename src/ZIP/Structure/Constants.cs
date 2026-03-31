@@ -4,7 +4,7 @@ using Ufex.API;
 
 namespace Ufex.Extensions.Core.ZIP.Structure;
 
-internal static class Constants
+public static class Constants
 {
 	public static readonly Dictionary<int, string> COMPRESSION_METHODS = new Dictionary<int, string>
 	{

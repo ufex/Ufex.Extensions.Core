@@ -5,7 +5,7 @@ using Ufex.Extensions.Core.ZIP.Data;
 
 namespace Ufex.Extensions.Core.ZIP.Structure;
 
-internal class LocalFileHeaderNode : SectionNode
+public class LocalFileHeaderNode : SectionNode
 {
 	public LocalFileHeaderNode(LocalFileHeader localFileHeader) 
 		: base(localFileHeader, "Local File Header", TreeViewIcon.Header)

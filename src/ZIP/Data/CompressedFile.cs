@@ -6,7 +6,7 @@ using Ufex.API.Validation;
 
 namespace Ufex.Extensions.Core.ZIP.Data;
 
-internal class CompressedFile : Section
+public class CompressedFile : Section
 {
 	public LocalFileHeader Header { get; init; }
 	public FileData FileData { get; init; }
@@ -19,7 +19,7 @@ internal class CompressedFile : Section
 		Header = new LocalFileHeader(br);
 		
 		// Read File Data
-		FileData = new FileData(br, dataSize, Header.CompressionMethod, validationReport);
+		FileData = new FileData(br, dataSize, Header.CompressionMethod);
 
 		// Read Data Descriptor if present
 		if(Header.HasDataDescriptor)

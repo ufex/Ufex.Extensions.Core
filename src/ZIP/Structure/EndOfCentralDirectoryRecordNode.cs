@@ -5,7 +5,7 @@ using Ufex.Extensions.Core.ZIP.Data;
 
 namespace Ufex.Extensions.Core.ZIP.Structure;
 
-internal class EndOfCentralDirectoryRecordNode : SectionNode
+public class EndOfCentralDirectoryRecordNode : SectionNode
 {
 	public EndOfCentralDirectoryRecordNode(EndOfCentralDirectoryRecord record)
 		: base(record, "End of Central Directory Record", TreeViewIcon.Footer)
