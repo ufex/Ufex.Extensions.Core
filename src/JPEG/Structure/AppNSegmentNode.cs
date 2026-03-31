@@ -1,4 +1,6 @@
 using Ufex.API.Tree;
+using Ufex.Extensions.Core.EXIF.Data;
+using Ufex.Extensions.Core.EXIF.Structure;
 using Ufex.Extensions.Core.JPEG.Data;
 
 namespace Ufex.Extensions.Core.JPEG.Structure;
@@ -9,9 +11,11 @@ namespace Ufex.Extensions.Core.JPEG.Structure;
 /// </summary>
 internal class AppNSegmentNode : SegmentNode
 {
-	public AppNSegmentNode(AppNSegment segment)
+	public AppNSegmentNode(AppNSegment segment, ExifData? exifData = null)
 		: base(segment, segment.MarkerName, $"Application Data ({segment.AppIdentifierString})", TreeViewIcon.Properties)
 	{
+		if (segment.AppIdentifierString == "Exif" && exifData != null)
+			Nodes.Add(new ExifNode(exifData));
 	}
 
 	protected override object[][] GetRows()

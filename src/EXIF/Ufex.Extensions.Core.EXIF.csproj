@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<RootNamespace>Ufex.Extensions.Core.EXIF</RootNamespace>
+		<AssemblyName>Ufex.Extensions.Core.EXIF</AssemblyName>
+		<Version>2.0.1.0</Version>
+		<RepositoryUrl>https://github.com/Ufex/Ufex.Extensions.Core</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+	</PropertyGroup>
+
+</Project>

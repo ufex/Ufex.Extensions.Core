@@ -1,6 +1,8 @@
 using Microsoft.Extensions.Logging;
 using Ufex.API;
 using Ufex.API.Validation;
+using Ufex.Extensions.Core.EXIF;
+using Ufex.Extensions.Core.EXIF.Data;
 using Ufex.Extensions.Core.JPEG.Data;
 
 namespace Ufex.Extensions.Core.JPEG;
@@ -37,6 +39,8 @@ public class JfifStreamReader
 	/// Whether the file is a valid JFIF file
 	/// </summary>
 	public bool IsValid { get; private set; }
+	public ExifData? ExifData { get; private set; }
+	public long? ExifSegmentOffset { get; private set; }
 
 	public JfifStreamReader(Stream fileStream, Logger log, ValidationReport validationReport)
 	{
@@ -90,6 +94,8 @@ public class JfifStreamReader
 				JfifApp0 = jfif;
 			else if (segment is SofSegment sof)
 				Sof = sof;
+			else if (segment is AppNSegment appn && appn.AppIdentifierString == "Exif" && ExifData == null)
+				TryReadExif(segment, appn);
 
 			// Handle SOS: skip past entropy-coded data to find the next marker
 			if (segment is SosSegment sos)
@@ -119,6 +125,32 @@ public class JfifStreamReader
 		IsValid = true;
 		ValidationReport.Info($"Successfully parsed {Segments.Count} marker segments");
 		return true;
+	}
+
+	private void TryReadExif(Segment segment, AppNSegment appn)
+	{
+		long appDataStart = segment.Offset + 4;
+		long tiffStart = appDataStart + appn.AppIdentifier.Length;
+		long exifLength = segment.Length - 2 - appn.AppIdentifier.Length;
+
+		if (appn.AppData.Length > 0 && appn.AppData[0] == 0)
+		{
+			tiffStart += 1;
+			exifLength -= 1;
+		}
+
+		if (exifLength <= 8)
+		{
+			ValidationReport.Warning("EXIF APP1 segment is too short to contain a TIFF header.");
+			return;
+		}
+
+		var exifReader = new ExifStreamReader(_fileStream, Log, ValidationReport, tiffStart, exifLength);
+		if (exifReader.Read())
+		{
+			ExifData = exifReader.ExifData;
+			ExifSegmentOffset = segment.Offset;
+		}
 	}
 
 	/// <summary>

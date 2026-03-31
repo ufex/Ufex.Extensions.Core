@@ -3,6 +3,7 @@ using Ufex.API.Tree;
 using Ufex.API.Tables;
 using Ufex.API.Visual;
 using Ufex.API.Format;
+using Ufex.Extensions.Core.EXIF.Data;
 using Ufex.Extensions.Core.JPEG.Data;
 
 namespace Ufex.Extensions.Core.JPEG.Structure;
@@ -31,13 +32,20 @@ internal class SegmentNode : TreeNode
 	/// </summary>
 	public static SegmentNode FromSegment(Segment segment)
 	{
+		return FromSegment(segment, null, null);
+	}
+
+	public static SegmentNode FromSegment(Segment segment, ExifData? exifData, long? exifSegmentOffset)
+	{
+		ExifData? appExifData = exifSegmentOffset == segment.Offset ? exifData : null;
+
 		return segment switch
 		{
 			SoiSegment soi => new SoiSegmentNode(soi),
 			EoiSegment eoi => new EoiSegmentNode(eoi),
 			App0JfifSegment jfif => new App0JfifSegmentNode(jfif),
 			App0JfxxSegment jfxx => new App0JfxxSegmentNode(jfxx),
-			AppNSegment appn => new AppNSegmentNode(appn),
+			AppNSegment appn => new AppNSegmentNode(appn, appExifData),
 			SofSegment sof => new SofSegmentNode(sof),
 			DqtSegment dqt => new DqtSegmentNode(dqt),
 			DhtSegment dht => new DhtSegmentNode(dht),

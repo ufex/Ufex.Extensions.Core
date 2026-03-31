@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Ufex.API;
 using Ufex.API.Tables;
 using Ufex.API.Visual;
+using Ufex.Extensions.Core.EXIF;
 using Ufex.Extensions.Core.JPEG.Data;
 using Ufex.Extensions.Core.JPEG.Structure;
 
@@ -16,9 +17,9 @@ public class JfifFileType : FileType
 {
 	public JfifFileType()
 	{
-		ShowGraphic = true;
-		ShowTechnical = true;
-		ShowFileCheck = true;
+		EnableVisual = true;
+		EnableStructure = true;
+		EnableValidation = true;
 		Description = "JPEG/JFIF Image";
 	}
 
@@ -97,6 +98,9 @@ public class JfifFileType : FileType
 		}
 
 		QuickInfoTable.AddRow("Segments", reader.Segments.Count.ToString());
+
+		if (reader.ExifData != null)
+			ExifQuickInfo.Populate(QuickInfoTable, reader.ExifData);
 	}
 
 	private void BuildVisuals(JfifStreamReader reader)
@@ -132,7 +136,7 @@ public class JfifFileType : FileType
 		foreach (var segment in reader.Segments)
 		{
 			Log.LogInformation($"Processing segment {segment.MarkerName} at offset {segment.Offset}");
-			var node = SegmentNode.FromSegment(segment);
+			var node = SegmentNode.FromSegment(segment, reader.ExifData, reader.ExifSegmentOffset);
 			TreeNodes.Add(node);
 		}
 	}

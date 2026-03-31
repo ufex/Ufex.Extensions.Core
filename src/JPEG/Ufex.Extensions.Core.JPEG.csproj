@@ -8,4 +8,8 @@
     <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\EXIF\Ufex.Extensions.Core.EXIF.csproj" />
+  </ItemGroup>
+
 </Project>
