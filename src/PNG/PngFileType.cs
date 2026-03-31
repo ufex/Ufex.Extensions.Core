@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 using Ufex.API;
 using Ufex.API.Tables;
 using Ufex.API.Visual;
+using Ufex.Extensions.Core.EXIF;
 using Ufex.Extensions.Core.PNG.Data;
 using Ufex.Extensions.Core.PNG.Structure;
 
@@ -189,6 +190,9 @@ public class PngFileType : FileType
 			if (Metadata.TryGetValue(metadataKeys[i], out string value))
 				quickInfo.AddRow(metadataKeys[i], value);
 		}
+
+		if (pngReader.ExifData != null)
+			ExifQuickInfo.Populate(quickInfo, pngReader.ExifData);
 	}
 
 	protected void BuildVisuals(PngStreamReader pngReader)
@@ -215,7 +219,7 @@ public class PngFileType : FileType
 		foreach(Chunk chunk in pngReader.Chunks)
 		{
 			Log.Info($"Processing chunk at position {chunk.Offset}, type {chunk.GetType().Name}");
-			ChunkNode node = ChunkNode.FromChunk(chunk);
+			ChunkNode node = ChunkNode.FromChunk(chunk, pngReader.ExifData, pngReader.ExifChunkOffset);
 			TreeNodes.Add(node);
 		}
 	}

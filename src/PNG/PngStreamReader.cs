@@ -7,6 +7,8 @@ using Ufex.API;
 using Ufex.API.Tables;
 using Ufex.API.Validation;
 
+using Ufex.Extensions.Core.EXIF;
+using Ufex.Extensions.Core.EXIF.Data;
 using Ufex.Extensions.Core.PNG.Data;
 
 namespace Ufex.Extensions.Core.PNG;
@@ -20,6 +22,8 @@ public class PngStreamReader
 	public Logger Log { get; set; }
 	public ValidationReport ValidationReport { get; set; }
 	public int ColorType { get; private set; }
+	public ExifData? ExifData { get; private set; }
+	public long? ExifChunkOffset { get; private set; }
 
 	public PngStreamReader(Stream fileStream, Logger log, ValidationReport validationReport)
 	{
@@ -68,6 +72,11 @@ public class PngStreamReader
 				ColorType = ihdr.ColorType;
 			}
 
+			if (chunkTypeStr == "eXIf" && ExifData == null)
+			{
+				TryReadExifChunk(startPos, length, newChunk.Offset);
+			}
+
 			Int64 endPos = _fileStream.Position;
 			long adjustement = length - (endPos - startPos);
 			if(adjustement > 0)
@@ -83,6 +92,30 @@ public class PngStreamReader
 		}
 
 		return true;
+	}
+
+	private void TryReadExifChunk(long exifDataOffset, UInt32 exifDataLength, long chunkOffset)
+	{
+		if (exifDataLength < 8)
+		{
+			ValidationReport.Warning("PNG eXIf chunk is too short to contain a TIFF header.");
+			return;
+		}
+
+		long currentPosition = _fileStream.Position;
+		try
+		{
+			var exifReader = new ExifStreamReader(_fileStream, Log, ValidationReport, exifDataOffset, exifDataLength);
+			if (exifReader.Read())
+			{
+				ExifData = exifReader.ExifData;
+				ExifChunkOffset = chunkOffset;
+			}
+		}
+		finally
+		{
+			_fileStream.Seek(currentPosition, SeekOrigin.Begin);
+		}
 	}
 	
 	private bool CompareArrays(byte[] array1, byte[] array2)

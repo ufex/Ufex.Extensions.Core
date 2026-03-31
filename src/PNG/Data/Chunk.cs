@@ -27,6 +27,7 @@ internal class Chunk
 		{ "tEXt", typeof(TextChunk) },
 		{ "zTXt", typeof(ZtxtChunk) },
 		{ "iTXt", typeof(ItxtChunk) },
+		{ "eXIf", typeof(ExifChunk) },
 	};
 
 	public UInt32 Length { get; init; }

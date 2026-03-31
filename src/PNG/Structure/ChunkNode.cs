@@ -4,6 +4,7 @@ using Ufex.API.Tree;
 using Ufex.API.Tables;
 using Ufex.API.Visual;
 using Ufex.API.Format;
+using Ufex.Extensions.Core.EXIF.Data;
 using Ufex.Extensions.Core.PNG.Data;
 
 namespace Ufex.Extensions.Core.PNG.Structure;
@@ -28,6 +29,17 @@ internal class ChunkNode : TreeNode
 
 	public static ChunkNode FromChunk(Chunk chunk)
 	{
+		return FromChunk(chunk, null, null);
+	}
+
+	public static ChunkNode FromChunk(Chunk chunk, ExifData? exifData, long? exifChunkOffset)
+	{
+		if (chunk is ExifChunk exifChunk)
+		{
+			ExifData? chunkExifData = exifChunkOffset == chunk.Offset ? exifData : null;
+			return new ExifChunkNode(exifChunk, chunkExifData);
+		}
+
 		var chunkType = chunk.ChunkTypeString;
 		var nodeTypeName = GetNodeTypeName(chunkType);
 
