@@ -49,9 +49,9 @@ public class PartNode : TreeNode
 		td.AddRow("Compressed Size", fileData.CompressedSize, ByteCountFormatter.Format(fileData.CompressedSize));
 		td.AddRow("Uncompressed Size", header.UncompressedSize, ByteCountFormatter.Format(header.UncompressedSize));
 		td.AddRow("Compression Method", fileData.CompressionMethod, GetCompressionMethodName(fileData.CompressionMethod));
-		td.AddRow("CRC-32", header.Crc32, $"0x{header.Crc32:X8}");
-		td.AddRow("Last Modified Date", header.LastModFileDateText, "Date in DOS format");
-		td.AddRow("Last Modified Time", header.LastModFileTimeText, "Time in DOS format");
+		td.AddRow("CRC-32", header.Crc32);
+		td.AddRow("Last Modified Date", header.LastModFileDate, header.LastModFileDateText);
+		td.AddRow("Last Modified Time", header.LastModFileTime, header.LastModFileTimeText);
 
 		return td;
 	}

@@ -22,9 +22,9 @@ public class ZipFileType : FileType
 
 	public ZipFileType()
 	{
-		ShowTechnical = true;
-		ShowGraphic = true;
-		ShowFileCheck = true;
+		EnableStructure = true;
+		EnableVisual = true;
+		EnableValidation = true;
 		Parts = new List<Section>();
 	}
 

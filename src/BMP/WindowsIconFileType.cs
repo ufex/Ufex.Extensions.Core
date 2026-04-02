@@ -18,9 +18,9 @@ public class WindowsIconFileType : FileType
 	public WindowsIconFileType()
 	{
 		Description = "Windows Icon (ICO)";
-		ShowTechnical = true;
-		ShowGraphic = true;
-		ShowFileCheck = true;
+		EnableVisual = true;
+		EnableStructure = true;
+		EnableValidation = true;
 	}
 
 	public override bool ProcessFile()

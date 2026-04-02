@@ -66,9 +66,9 @@ public class PngFileType : FileType
 
 	public PngFileType()
 	{
-		ShowGraphic = true;
-		ShowTechnical = true;
-		ShowFileCheck = false;
+		EnableStructure = true;
+		EnableVisual = true;
+		EnableValidation = false;
 	}
 
 	public override bool ProcessFile()

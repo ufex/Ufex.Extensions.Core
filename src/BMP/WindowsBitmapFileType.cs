@@ -16,9 +16,9 @@ public class WindowsBitmapFileType : FileType
 	public WindowsBitmapFileType()
 	{
 		Description = "Windows Bitmap (BMP)";
-		ShowTechnical = true;
-		ShowGraphic = true;
-		ShowFileCheck = true;
+		EnableStructure = true;
+		EnableVisual = true;
+		EnableValidation = true;
 	}
 
 	public override bool ProcessFile()

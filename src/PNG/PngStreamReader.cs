@@ -42,7 +42,7 @@ public class PngStreamReader
 		if(!CompareArrays(header, Signatures.SIGNATURE))
 		{
 			// Invalid header
-			throw new Exception("Invalid PNG file signature.");
+			throw new Exception("Invalid PNG file signature: " + BitConverter.ToString(header));
 		}
 
 		ColorType = -1;

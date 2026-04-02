@@ -15,9 +15,9 @@ public class GzipFileType : FileType
 {
 	public GzipFileType()
 	{
-		ShowGraphic = true;
-		ShowTechnical = true;
-		ShowFileCheck = true;
+		EnableVisual = true;
+		EnableStructure = true;
+		EnableValidation = true;
 	}
 
 	public override bool ProcessFile()

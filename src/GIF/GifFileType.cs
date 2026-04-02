@@ -16,9 +16,9 @@ public class GifFileType : FileType
 
 	public GifFileType()
 	{
-		ShowGraphic = true;
-		ShowTechnical = true;
-		ShowFileCheck = true;
+		EnableVisual = true;
+		EnableStructure = true;
+		EnableValidation = true;
 		Description = "GIF Image";
 	}
 

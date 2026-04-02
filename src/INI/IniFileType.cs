@@ -19,9 +19,9 @@ public class IniFileType : FileType
 {
 	public IniFileType()
 	{
-		ShowGraphic = true;
-		ShowTechnical = true;
-		ShowFileCheck = true;
+		EnableVisual = true;
+		EnableStructure = true;
+		EnableValidation = true;
 	}
 
 	public override bool ProcessFile()
