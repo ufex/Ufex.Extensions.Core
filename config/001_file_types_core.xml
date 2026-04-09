@@ -107,5 +107,24 @@
 				<ID>DOCS_MS_PPTX</ID>
 			</FileTypes>
 		</FileTypeClass>
+		<FileTypeClass>
+			<ID>FTMD_MP4</ID>
+			<AssemblyPath>ISOBMFF.dll</AssemblyPath>
+			<FullTypeName>Ufex.Extensions.Core.ISOBMFF.IsoBmffFileType</FullTypeName>
+			<FileTypes>
+				<ID>VIDEO_MP4</ID>
+				<ID>VIDEO_3GPP</ID>
+				<ID>VIDEO_3GPP2</ID>
+				<ID>VIDEO_MJ2</ID>
+			</FileTypes>
+		</FileTypeClass>
+		<FileTypeClass>
+			<ID>FTMD_QUICKTIME</ID>
+			<AssemblyPath>ISOBMFF.dll</AssemblyPath>
+			<FullTypeName>Ufex.Extensions.Core.ISOBMFF.QtffFileType</FullTypeName>
+			<FileTypes>
+				<ID>VIDEO_QUICKTIME</ID>
+			</FileTypes>
+		</FileTypeClass>
 	</FileTypeClasses>
 </Ufex>
