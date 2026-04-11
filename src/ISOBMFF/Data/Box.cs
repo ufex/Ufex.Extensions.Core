@@ -37,7 +37,10 @@ internal class Box
 		"stsz", "stz2", "stco", "co64", "sgpd", "sbgp", "sdtp", "subs",
 		"mehd", "trex", "mfhd", "tfhd", "tfdt", "trun", "tfra", "mfro",
 		"elst", "pdin", "iinf", "infe", "iloc", "iref",
-		"pitm", "url ", "urn "
+		"pitm", "url ", "urn ",
+		// 3GPP metadata boxes
+		"titl", "dscp", "cprt", "perf", "auth", "gnre",
+		"rtng", "clsf", "kywd", "loci", "albm", "yrrc"
 	};
 
 	/// <summary>
@@ -61,6 +64,19 @@ internal class Box
 		{ "co64", typeof(Co64Box) },
 		{ "stss", typeof(StssBox) },
 		{ "ctts", typeof(CttsBox) },
+		// 3GPP metadata boxes
+		{ "titl", typeof(ThreeGpp.TextMetadataBox) },
+		{ "dscp", typeof(ThreeGpp.TextMetadataBox) },
+		{ "cprt", typeof(ThreeGpp.TextMetadataBox) },
+		{ "perf", typeof(ThreeGpp.TextMetadataBox) },
+		{ "auth", typeof(ThreeGpp.TextMetadataBox) },
+		{ "gnre", typeof(ThreeGpp.TextMetadataBox) },
+		{ "rtng", typeof(ThreeGpp.RtngBox) },
+		{ "clsf", typeof(ThreeGpp.ClsfBox) },
+		{ "kywd", typeof(ThreeGpp.KywdBox) },
+		{ "loci", typeof(ThreeGpp.LociBox) },
+		{ "albm", typeof(ThreeGpp.AlbmBox) },
+		{ "yrrc", typeof(ThreeGpp.YrrcBox) },
 	};
 
 	/// <summary>

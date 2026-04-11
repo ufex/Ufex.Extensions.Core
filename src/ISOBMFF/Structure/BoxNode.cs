@@ -32,6 +32,14 @@ internal class BoxNode : TreeNode
 		{ typeof(Co64Box), typeof(Co64BoxNode) },
 		{ typeof(StssBox), typeof(StssBoxNode) },
 		{ typeof(CttsBox), typeof(CttsBoxNode) },
+		// 3GPP metadata boxes
+		{ typeof(Data.ThreeGpp.TextMetadataBox), typeof(ThreeGpp.TextMetadataBoxNode) },
+		{ typeof(Data.ThreeGpp.RtngBox), typeof(ThreeGpp.RtngBoxNode) },
+		{ typeof(Data.ThreeGpp.ClsfBox), typeof(ThreeGpp.ClsfBoxNode) },
+		{ typeof(Data.ThreeGpp.KywdBox), typeof(ThreeGpp.KywdBoxNode) },
+		{ typeof(Data.ThreeGpp.LociBox), typeof(ThreeGpp.LociBoxNode) },
+		{ typeof(Data.ThreeGpp.AlbmBox), typeof(ThreeGpp.AlbmBoxNode) },
+		{ typeof(Data.ThreeGpp.YrrcBox), typeof(ThreeGpp.YrrcBoxNode) },
 	};
 
 	protected Box _box;
