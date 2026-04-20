@@ -40,6 +40,22 @@ internal class BoxNode : TreeNode
 		{ typeof(Data.ThreeGpp.LociBox), typeof(ThreeGpp.LociBoxNode) },
 		{ typeof(Data.ThreeGpp.AlbmBox), typeof(ThreeGpp.AlbmBoxNode) },
 		{ typeof(Data.ThreeGpp.YrrcBox), typeof(ThreeGpp.YrrcBoxNode) },
+		// HEIF boxes
+		{ typeof(Data.Heif.PitmBox), typeof(Heif.PitmBoxNode) },
+		{ typeof(Data.Heif.IlocBox), typeof(Heif.IlocBoxNode) },
+		{ typeof(Data.Heif.IinfBox), typeof(Heif.IinfBoxNode) },
+		{ typeof(Data.Heif.InfeBox), typeof(Heif.InfeBoxNode) },
+		{ typeof(Data.Heif.IspeBox), typeof(Heif.IspeBoxNode) },
+		{ typeof(Data.Heif.PixiBox), typeof(Heif.PixiBoxNode) },
+		{ typeof(Data.Heif.ColrBox), typeof(Heif.ColrBoxNode) },
+		{ typeof(Data.Heif.IrotBox), typeof(Heif.IrotBoxNode) },
+		{ typeof(Data.Heif.ImirBox), typeof(Heif.ImirBoxNode) },
+		{ typeof(Data.Heif.ClapBox), typeof(Heif.ClapBoxNode) },
+		{ typeof(Data.Heif.AuxcBox), typeof(Heif.AuxcBoxNode) },
+		{ typeof(Data.Heif.IpmaBox), typeof(Heif.IpmaBoxNode) },
+		{ typeof(Data.Heif.PaspBox), typeof(Heif.PaspBoxNode) },
+		{ typeof(Data.Heif.ClliBox), typeof(Heif.ClliBoxNode) },
+		{ typeof(Data.Heif.MdcvBox), typeof(Heif.MdcvBoxNode) },
 	};
 
 	protected Box _box;

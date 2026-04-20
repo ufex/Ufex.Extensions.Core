@@ -22,7 +22,7 @@ internal class Box
 	{
 		"moov", "trak", "mdia", "minf", "stbl", "dinf", "edts", "udta",
 		"meta", "mvex", "moof", "traf", "mfra", "clip", "matt", "iprp",
-		"sinf", "schi", "rinf", "ilst"
+		"sinf", "schi", "rinf", "ilst", "ipco", "grpl"
 	};
 
 	/// <summary>
@@ -37,10 +37,12 @@ internal class Box
 		"stsz", "stz2", "stco", "co64", "sgpd", "sbgp", "sdtp", "subs",
 		"mehd", "trex", "mfhd", "tfhd", "tfdt", "trun", "tfra", "mfro",
 		"elst", "pdin", "iinf", "infe", "iloc", "iref",
-		"pitm", "url ", "urn ",
+		"pitm", "url ", "urn ", "meta",
 		// 3GPP metadata boxes
 		"titl", "dscp", "cprt", "perf", "auth", "gnre",
-		"rtng", "clsf", "kywd", "loci", "albm", "yrrc"
+		"rtng", "clsf", "kywd", "loci", "albm", "yrrc",
+		// HEIF boxes
+		"ispe", "pixi", "auxC", "ipma"
 	};
 
 	/// <summary>
@@ -77,6 +79,22 @@ internal class Box
 		{ "loci", typeof(ThreeGpp.LociBox) },
 		{ "albm", typeof(ThreeGpp.AlbmBox) },
 		{ "yrrc", typeof(ThreeGpp.YrrcBox) },
+		// HEIF boxes
+		{ "pitm", typeof(Heif.PitmBox) },
+		{ "iloc", typeof(Heif.IlocBox) },
+		{ "iinf", typeof(Heif.IinfBox) },
+		{ "infe", typeof(Heif.InfeBox) },
+		{ "ispe", typeof(Heif.IspeBox) },
+		{ "pixi", typeof(Heif.PixiBox) },
+		{ "colr", typeof(Heif.ColrBox) },
+		{ "irot", typeof(Heif.IrotBox) },
+		{ "imir", typeof(Heif.ImirBox) },
+		{ "clap", typeof(Heif.ClapBox) },
+		{ "auxC", typeof(Heif.AuxcBox) },
+		{ "ipma", typeof(Heif.IpmaBox) },
+		{ "pasp", typeof(Heif.PaspBox) },
+		{ "clli", typeof(Heif.ClliBox) },
+		{ "mdcv", typeof(Heif.MdcvBox) },
 	};
 
 	/// <summary>

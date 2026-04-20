@@ -4,10 +4,11 @@ This extension provides support for the ISO Base Media File Format (ISOBMFF) and
 
 ## Architecture
 
-The extension uses a shared base class (`BaseIsobmffFileType`) that contains common parsing and display logic for both formats. Format-specific validation is handled by two subclasses:
+The extension uses a shared base class (`BaseIsobmffFileType`) that contains common parsing and display logic for both formats. Format-specific validation is handled by subclasses:
 
 - **`QtffFileType`** — For QuickTime `.mov` / `.qt` files. QTFF files may lack an `ftyp` box and can contain Apple-specific atoms (`wide`, `clip`, `matt`, `gmhd`, etc.).
-- **`IsoBmffFileType`** — For ISOBMFF derivatives (`.mp4`, `.m4a`, `.m4v`, `.3gp`, `.heic`, `.avif`, etc.). Validates `ftyp` presence, box ordering, and flags QTFF-specific atoms.
+- **`IsoBmffFileType`** — For ISOBMFF derivatives (`.mp4`, `.m4a`, `.m4v`, `.3gp`, etc.). Validates `ftyp` presence, box ordering, and flags QTFF-specific atoms.
+- **`HeifFileType`** — For HEIF/HEIC/AVIF image files (`.heic`, `.heif`, `.avif`). Uses item-based infrastructure (`meta`, `iloc`, `iinf`, `iprp`) rather than tracks. Extracts EXIF metadata from Exif items.
 
 ## Project Structure
 
@@ -20,17 +21,36 @@ ISOBMFF/
 │   ├── MvhdBox.cs           — Movie Header box (timing, rate, matrix)
 │   ├── TkhdBox.cs           — Track Header box (per-track metadata)
 │   ├── MdhdBox.cs           — Media Header box (media timing, language)
-│   └── HdlrBox.cs           — Handler Reference box (media/data handler)
+│   ├── HdlrBox.cs           — Handler Reference box (media/data handler)
+│   ├── Heif/                — HEIF-specific box classes
+│   │   ├── PitmBox.cs       — Primary Item box
+│   │   ├── IlocBox.cs       — Item Location box
+│   │   ├── InfeBox.cs       — Item Information Entry box
+│   │   ├── IspeBox.cs       — Image Spatial Extents property
+│   │   ├── PixiBox.cs       — Pixel Information property
+│   │   ├── ColrBox.cs       — Colour Information property (ICC/nclx)
+│   │   ├── IrotBox.cs       — Image Rotation property
+│   │   ├── ImirBox.cs       — Image Mirror property
+│   │   ├── ClapBox.cs       — Clean Aperture property
+│   │   ├── AuxcBox.cs       — Auxiliary Type property
+│   │   ├── IpmaBox.cs       — Item Property Association box
+│   │   ├── PaspBox.cs       — Pixel Aspect Ratio property
+│   │   ├── ClliBox.cs       — Content Light Level Info (HDR)
+│   │   └── MdcvBox.cs       — Mastering Display Colour Volume (HDR)
+│   └── ThreeGpp/            — 3GPP-specific box classes
 ├── Structure/
 │   ├── BoxNode.cs           — Base TreeNode with factory and tabular display
 │   ├── FtypBoxNode.cs       — File Type node (brand display)
 │   ├── MvhdBoxNode.cs       — Movie Header node (timestamps, duration)
 │   ├── TkhdBoxNode.cs       — Track Header node (dimensions, flags)
 │   ├── MdhdBoxNode.cs       — Media Header node (language decoding)
-│   └── HdlrBoxNode.cs       — Handler Reference node
+│   ├── HdlrBoxNode.cs       — Handler Reference node
+│   ├── Heif/                — HEIF-specific node classes
+│   └── ThreeGpp/            — 3GPP-specific node classes
 ├── BaseIsobmffFileType.cs   — Shared parsing, QuickInfo, FileMap, Structure
 ├── QtffFileType.cs          — QTFF-specific validation
 ├── IsoBmffFileType.cs       — ISOBMFF-specific validation
+├── HeifFileType.cs          — HEIF/HEIC/AVIF validation + EXIF integration
 ├── BoxStreamReader.cs       — Top-level box stream parser
 └── README.md
 ```

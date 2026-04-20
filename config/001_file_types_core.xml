@@ -126,5 +126,14 @@
 				<ID>VIDEO_QUICKTIME</ID>
 			</FileTypes>
 		</FileTypeClass>
+		<FileTypeClass>
+			<ID>FTMD_HEIF</ID>
+			<AssemblyPath>ISOBMFF.dll</AssemblyPath>
+			<FullTypeName>Ufex.Extensions.Core.ISOBMFF.HeifFileType</FullTypeName>
+			<FileTypes>
+				<ID>IMAGE_HEIF</ID>
+				<ID>IMAGE_AVIF</ID>
+			</FileTypes>
+		</FileTypeClass>
 	</FileTypeClasses>
 </Ufex>
