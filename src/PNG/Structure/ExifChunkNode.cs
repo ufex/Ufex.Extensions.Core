@@ -14,7 +14,7 @@ internal class ExifChunkNode : ChunkNode
 		: base(chunk, "eXIf", "Exif metadata", TreeViewIcon.Properties)
 	{
 		if (exifData != null)
-			Nodes.Add(new ExifNode(exifData));
+			ExifNodes.AddTo(Nodes, exifData);
 	}
 
 	public override object[][] GetRows()

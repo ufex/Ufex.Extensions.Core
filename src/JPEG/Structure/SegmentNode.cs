@@ -35,9 +35,11 @@ internal class SegmentNode : TreeNode
 		return FromSegment(segment, null, null);
 	}
 
-	public static SegmentNode FromSegment(Segment segment, ExifData? exifData, long? exifSegmentOffset)
+	public static SegmentNode FromSegment(Segment segment, ExifData? exifData, long? exifSegmentOffset,
+		List<Segment>? thumbnailSegments = null)
 	{
 		ExifData? appExifData = exifSegmentOffset == segment.Offset ? exifData : null;
+		List<Segment>? appThumbSegments = appExifData != null ? thumbnailSegments : null;
 
 		return segment switch
 		{
@@ -45,7 +47,7 @@ internal class SegmentNode : TreeNode
 			EoiSegment eoi => new EoiSegmentNode(eoi),
 			App0JfifSegment jfif => new App0JfifSegmentNode(jfif),
 			App0JfxxSegment jfxx => new App0JfxxSegmentNode(jfxx),
-			AppNSegment appn => new AppNSegmentNode(appn, appExifData),
+			AppNSegment appn => new AppNSegmentNode(appn, appExifData, appThumbSegments),
 			SofSegment sof => new SofSegmentNode(sof),
 			DqtSegment dqt => new DqtSegmentNode(dqt),
 			DhtSegment dht => new DhtSegmentNode(dht),

@@ -26,6 +26,13 @@
   <Target Name="CopyPluginToOutput" AfterTargets="Build">
     <MakeDir Directories="$(PluginOutputDir)" />
     <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(PluginOutputDir)" SkipUnchangedFiles="true" />
+    <!-- Copy deps.json and referenced plugin assemblies so AssemblyDependencyResolver can resolve dependencies -->
+    <ItemGroup>
+      <_PluginDepsFiles Include="$(TargetDir)$(AssemblyName).deps.json" />
+      <_PluginRefAssemblies Include="@(ReferenceCopyLocalPaths)" Condition="'%(ReferenceCopyLocalPaths.Extension)' == '.dll' and '%(Filename)' != 'Ufex.API'" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_PluginDepsFiles)" DestinationFolder="$(PluginOutputDir)" SkipUnchangedFiles="true" Condition="'@(_PluginDepsFiles)' != ''" />
+    <Copy SourceFiles="@(_PluginRefAssemblies)" DestinationFolder="$(PluginOutputDir)" SkipUnchangedFiles="true" Condition="'@(_PluginRefAssemblies)' != ''" />
     <!-- Copy additional whitelisted file types from build output -->
     <ItemGroup>
       <_PluginExtraFiles Include="$(TargetDir)*.onnx;$(TargetDir)*.onnx.data" />

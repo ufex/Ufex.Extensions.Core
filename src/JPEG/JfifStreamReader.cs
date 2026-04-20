@@ -26,6 +26,11 @@ public class JfifStreamReader
 	internal List<Segment> Segments { get; private set; } = new();
 
 	/// <summary>
+	/// Regions of unknown/unrecognized data found in the file
+	/// </summary>
+	internal List<UnknownDataSegment> UnknownDataSegments { get; private set; } = new();
+
+	/// <summary>
 	/// The JFIF APP0 segment (if present)
 	/// </summary>
 	internal App0JfifSegment? JfifApp0 { get; private set; }
@@ -41,6 +46,11 @@ public class JfifStreamReader
 	public bool IsValid { get; private set; }
 	public ExifData? ExifData { get; private set; }
 	public long? ExifSegmentOffset { get; private set; }
+
+	/// <summary>
+	/// Parsed JPEG segments from the embedded EXIF thumbnail (if present)
+	/// </summary>
+	internal List<Segment>? ThumbnailSegments { get; private set; }
 
 	public JfifStreamReader(Stream fileStream, Logger log, ValidationReport validationReport)
 	{
@@ -103,10 +113,15 @@ public class JfifStreamReader
 				SkipScanData(fr, sos);
 			}
 
-			// Stop after EOI
+			// After EOI, check for remaining data in the file
 			if (segment is EoiSegment)
 			{
 				Log.LogInformation("Reached EOI marker");
+
+				if (_fileStream.Position < _fileStream.Length)
+				{
+					ProcessRemainingData(fr);
+				}
 				break;
 			}
 		}
@@ -129,6 +144,8 @@ public class JfifStreamReader
 
 	private void TryReadExif(Segment segment, AppNSegment appn)
 	{
+		long savedPosition = _fileStream.Position;
+
 		long appDataStart = segment.Offset + 4;
 		long tiffStart = appDataStart + appn.AppIdentifier.Length;
 		long exifLength = segment.Length - 2 - appn.AppIdentifier.Length;
@@ -142,6 +159,7 @@ public class JfifStreamReader
 		if (exifLength <= 8)
 		{
 			ValidationReport.Warning("EXIF APP1 segment is too short to contain a TIFF header.");
+			_fileStream.Seek(savedPosition, SeekOrigin.Begin);
 			return;
 		}
 
@@ -150,6 +168,191 @@ public class JfifStreamReader
 		{
 			ExifData = exifReader.ExifData;
 			ExifSegmentOffset = segment.Offset;
+
+			// Parse embedded JPEG thumbnail if present
+			if (ExifData != null && ExifData.ThumbnailOffset.HasValue && ExifData.ThumbnailLength.HasValue)
+			{
+				TryParseThumbnail(ExifData.ThumbnailOffset.Value, ExifData.ThumbnailLength.Value);
+			}
+		}
+
+		_fileStream.Seek(savedPosition, SeekOrigin.Begin);
+	}
+
+	/// <summary>
+	/// Parses the embedded JPEG thumbnail within the EXIF data.
+	/// The thumbnail is a complete JPEG bitstream (SOI through EOI).
+	/// </summary>
+	private void TryParseThumbnail(long offset, long length)
+	{
+		if (offset + length > _fileStream.Length)
+		{
+			ValidationReport.Warning("EXIF thumbnail offset/length extends past end of file.");
+			return;
+		}
+
+		Log.LogInformation($"Parsing embedded JPEG thumbnail at offset 0x{offset:X}, length {length}");
+
+		long savedPosition = _fileStream.Position;
+		try
+		{
+			_fileStream.Seek(offset, SeekOrigin.Begin);
+			FileReader fr = new FileReader(_fileStream, Endian.Big);
+
+			var thumbSegments = new List<Segment>();
+			long thumbEnd = offset + length;
+
+			while (_fileStream.Position < thumbEnd)
+			{
+				byte? markerType = FindNextMarkerWithin(fr, thumbEnd);
+				if (markerType == null)
+					break;
+
+				_fileStream.Seek(-2, SeekOrigin.Current);
+
+				Segment? segment = Segment.CreateSegment(markerType.Value, fr);
+				if (segment == null)
+				{
+					// Unknown marker in thumbnail - skip rest
+					break;
+				}
+
+				thumbSegments.Add(segment);
+				Log.LogInformation($"Thumbnail segment: {segment.MarkerName} at offset 0x{segment.Offset:X}");
+
+				if (segment is SosSegment sos)
+				{
+					SkipScanData(fr, sos);
+				}
+
+				if (segment is EoiSegment)
+					break;
+			}
+
+			if (thumbSegments.Count > 0)
+			{
+				ThumbnailSegments = thumbSegments;
+				Log.LogInformation($"Parsed {thumbSegments.Count} thumbnail segments");
+			}
+		}
+		catch (Exception ex)
+		{
+			ValidationReport.Warning($"Failed to parse embedded JPEG thumbnail: {ex.Message}");
+		}
+		finally
+		{
+			_fileStream.Seek(savedPosition, SeekOrigin.Begin);
+		}
+	}
+
+	/// <summary>
+	/// Finds the next marker within a bounded region.
+	/// </summary>
+	private byte? FindNextMarkerWithin(FileReader fr, long endPosition)
+	{
+		while (_fileStream.Position < endPosition)
+		{
+			byte b = fr.ReadByte();
+			if (b != 0xFF)
+				continue;
+
+			while (_fileStream.Position < endPosition)
+			{
+				byte markerType = fr.ReadByte();
+				if (markerType == 0xFF)
+					continue;
+				if (markerType == 0x00)
+					break;
+				return markerType;
+			}
+		}
+
+		return null;
+	}
+
+	/// <summary>
+	/// Processes any remaining data after the first EOI marker.
+	/// If the data starts with a valid JPEG SOI marker, it is parsed as additional
+	/// JPEG segments. Otherwise, the remaining bytes are captured as unknown data.
+	/// </summary>
+	private void ProcessRemainingData(FileReader fr)
+	{
+		while (_fileStream.Position < _fileStream.Length)
+		{
+			long remainingStart = _fileStream.Position;
+
+			// Try to find the next marker
+			byte? markerType = FindNextMarker(fr);
+			if (markerType == null)
+			{
+				// No valid marker found - remaining data is unknown
+				long unknownLength = _fileStream.Length - remainingStart;
+				if (unknownLength > 0)
+				{
+					var unknown = new UnknownDataSegment(remainingStart, unknownLength);
+					UnknownDataSegments.Add(unknown);
+					ValidationReport.Warning($"Unknown data at offset 0x{remainingStart:X}, length {unknownLength} bytes");
+					Log.LogInformation($"Unknown data region at offset {remainingStart}, length {unknownLength}");
+				}
+				break;
+			}
+
+			// Check if there was unrecognized data before this marker
+			long markerPosition = _fileStream.Position - 2; // Position of 0xFF byte
+			if (markerPosition > remainingStart)
+			{
+				long unknownLength = markerPosition - remainingStart;
+				var unknown = new UnknownDataSegment(remainingStart, unknownLength);
+				UnknownDataSegments.Add(unknown);
+				ValidationReport.Warning($"Unknown data at offset 0x{remainingStart:X}, length {unknownLength} bytes");
+				Log.LogInformation($"Unknown data region at offset {remainingStart}, length {unknownLength}");
+			}
+
+			// Rewind to the start of the marker so constructors can read it
+			_fileStream.Seek(-2, SeekOrigin.Current);
+
+			Log.LogInformation($"Reading marker {Constants.GetMarkerName(markerType.Value)} (0x{markerType.Value:X2}) at position {_fileStream.Position} (after EOI)");
+
+			Segment? segment = Segment.CreateSegment(markerType.Value, fr);
+			if (segment == null)
+			{
+				// Unknown marker type - treat remaining data as unknown
+				long unknownLength = _fileStream.Length - _fileStream.Position;
+				if (unknownLength > 0)
+				{
+					var unknown = new UnknownDataSegment(_fileStream.Position, unknownLength);
+					UnknownDataSegments.Add(unknown);
+					ValidationReport.Warning($"Unknown marker 0x{markerType.Value:X2} at offset 0x{_fileStream.Position:X}, treating remaining {unknownLength} bytes as unknown data");
+					_fileStream.Seek(0, SeekOrigin.End);
+				}
+				break;
+			}
+
+			Segments.Add(segment);
+			Log.LogInformation($"Parsed {segment.MarkerName} at offset {segment.Offset}, length {segment.Length} (after EOI)");
+
+			// Track important segments
+			if (segment is App0JfifSegment jfif)
+				JfifApp0 ??= jfif;
+			else if (segment is SofSegment sof)
+				Sof ??= sof;
+			else if (segment is AppNSegment appn && appn.AppIdentifierString == "Exif" && ExifData == null)
+				TryReadExif(segment, appn);
+
+			// Handle SOS: skip past entropy-coded data
+			if (segment is SosSegment sos)
+			{
+				SkipScanData(fr, sos);
+			}
+
+			// If we hit another EOI, check for more data
+			if (segment is EoiSegment)
+			{
+				Log.LogInformation("Reached another EOI marker");
+				if (_fileStream.Position >= _fileStream.Length)
+					break;
+				// Continue the loop to process more remaining data
+			}
 		}
 	}
 

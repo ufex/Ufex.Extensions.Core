@@ -11,6 +11,16 @@ public class ExifData
 	public Ifd? Ifd1 { get; init; }
 	public Endian ByteOrder => TiffHeader.ByteOrder;
 
+	/// <summary>
+	/// Absolute file offset of the embedded JPEG thumbnail (from IFD1 tag 0x0201), or null if not present.
+	/// </summary>
+	public long? ThumbnailOffset { get; set; }
+
+	/// <summary>
+	/// Length of the embedded JPEG thumbnail data (from IFD1 tag 0x0202), or null if not present.
+	/// </summary>
+	public long? ThumbnailLength { get; set; }
+
 	public Ifd? GetIfd(IfdType ifdType)
 	{
 		return ifdType switch

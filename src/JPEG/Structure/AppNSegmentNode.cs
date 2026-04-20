@@ -11,11 +11,21 @@ namespace Ufex.Extensions.Core.JPEG.Structure;
 /// </summary>
 internal class AppNSegmentNode : SegmentNode
 {
-	public AppNSegmentNode(AppNSegment segment, ExifData? exifData = null)
+	public AppNSegmentNode(AppNSegment segment, ExifData? exifData = null, List<Segment>? thumbnailSegments = null)
 		: base(segment, segment.MarkerName, $"Application Data ({segment.AppIdentifierString})", TreeViewIcon.Properties)
 	{
 		if (segment.AppIdentifierString == "Exif" && exifData != null)
-			Nodes.Add(new ExifNode(exifData));
+		{
+			TreeNode[]? thumbNodes = null;
+			if (thumbnailSegments != null && thumbnailSegments.Count > 0)
+			{
+				thumbNodes = thumbnailSegments
+					.Select(s => (TreeNode)SegmentNode.FromSegment(s))
+					.ToArray();
+			}
+
+			ExifNodes.AddTo(Nodes, exifData, thumbNodes);
+		}
 	}
 
 	protected override object[][] GetRows()

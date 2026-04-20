@@ -68,6 +68,7 @@ public class ExifStreamReader
 
 		TiffHeader header = new TiffHeader
 		{
+			Offset = _tiffStart,
 			ByteOrder = byteOrder,
 			Magic = magic,
 			Ifd0Offset = ifd0Offset,
@@ -119,6 +120,23 @@ public class ExifStreamReader
 			GpsIfd = gpsIfd,
 			Ifd1 = ifd1,
 		};
+
+		// Extract thumbnail location from IFD1 (tags 0x0201 and 0x0202)
+		if (ifd1 != null)
+		{
+			IfdEntry? thumbOffsetEntry = ifd1.FindEntry(0x0201);
+			IfdEntry? thumbLengthEntry = ifd1.FindEntry(0x0202);
+			if (thumbOffsetEntry != null && thumbLengthEntry != null)
+			{
+				UInt32 thumbOffset = thumbOffsetEntry.GetFirstUInt32Value(byteOrder);
+				UInt32 thumbLength = thumbLengthEntry.GetFirstUInt32Value(byteOrder);
+				if (thumbOffset > 0 && thumbLength > 0)
+				{
+					ExifData.ThumbnailOffset = _tiffStart + thumbOffset;
+					ExifData.ThumbnailLength = thumbLength;
+				}
+			}
+		}
 
 		return true;
 	}

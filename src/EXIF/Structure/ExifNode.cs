@@ -5,39 +5,23 @@ using Ufex.Extensions.Core.EXIF.Data;
 
 namespace Ufex.Extensions.Core.EXIF.Structure;
 
-public class ExifNode : TreeNode
+/// <summary>
+/// Utility class for building EXIF tree nodes.
+/// </summary>
+public static class ExifNodes
 {
-	private readonly ExifData _exifData;
-
-	public ExifNode(ExifData exifData)
-		: base("EXIF", TreeViewIcon.Properties, TreeViewIcon.Properties)
+	/// <summary>
+	/// Adds EXIF child nodes (TIFF Header, IFD0, ExifIFD, GPSIFD, IFD1) to the given parent node.
+	/// </summary>
+	public static void AddTo(TreeNodeCollection nodes, ExifData exifData, TreeNode[]? thumbnailNodes = null)
 	{
-		_exifData = exifData;
-
-		Nodes.Add(new IfdNode(_exifData.Ifd0, _exifData));
-		if (_exifData.ExifIfd != null)
-			Nodes.Add(new IfdNode(_exifData.ExifIfd, _exifData));
-		if (_exifData.GpsIfd != null)
-			Nodes.Add(new IfdNode(_exifData.GpsIfd, _exifData));
-		if (_exifData.Ifd1 != null)
-			Nodes.Add(new IfdNode(_exifData.Ifd1, _exifData));
-	}
-
-	public override Visual[] Visuals => [new DataGridVisual(BuildHeaderTable(), "Header")];
-
-	private DynamicTableData BuildHeaderTable()
-	{
-		DynamicTableData table = new DynamicTableData(2, "EXIF.Header");
-		table.SetColumn(0, "Property");
-		table.SetColumn(1, "Value");
-
-		table.AddRow("Byte Order", _exifData.TiffHeader.ByteOrder.ToString());
-		table.AddRow("Magic", $"0x{_exifData.TiffHeader.Magic:X4}");
-		table.AddRow("IFD0 Offset", $"0x{_exifData.TiffHeader.Ifd0Offset:X8}");
-		table.AddRow("IFD0 Entries", _exifData.Ifd0.Entries.Count.ToString());
-		table.AddRow("ExifIFD", _exifData.ExifIfd != null ? "Present" : "Not present");
-		table.AddRow("GPSIFD", _exifData.GpsIfd != null ? "Present" : "Not present");
-		table.AddRow("IFD1", _exifData.Ifd1 != null ? "Present" : "Not present");
-		return table;
+		nodes.Add(new TiffHeaderNode(exifData.TiffHeader));
+		nodes.Add(new IfdNode(exifData.Ifd0, exifData));
+		if (exifData.ExifIfd != null)
+			nodes.Add(new IfdNode(exifData.ExifIfd, exifData));
+		if (exifData.GpsIfd != null)
+			nodes.Add(new IfdNode(exifData.GpsIfd, exifData));
+		if (exifData.Ifd1 != null)
+			nodes.Add(new IfdNode(exifData.Ifd1, exifData, thumbnailNodes));
 	}
 }

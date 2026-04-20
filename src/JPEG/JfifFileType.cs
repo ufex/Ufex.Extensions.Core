@@ -127,17 +127,53 @@ public class JfifFileType : FileType
 			});
 		}
 
+		foreach (var unknown in reader.UnknownDataSegments)
+		{
+			spans.Add(new FileSpan
+			{
+				StartPosition = unknown.Offset,
+				EndPosition = unknown.Offset + unknown.DataLength,
+				Name = "Unknown - Unrecognized Data",
+			});
+		}
+
 		var map = new FileMap(spans.ToArray(), (ulong)FileInStream.Length);
 		VisualsList.Add(map);
 	}
 
 	private void BuildStructure(JfifStreamReader reader)
 	{
-		foreach (var segment in reader.Segments)
+		// Merge segments and unknown data regions in file offset order
+		int segIdx = 0;
+		int unkIdx = 0;
+		var segments = reader.Segments;
+		var unknowns = reader.UnknownDataSegments;
+
+		while (segIdx < segments.Count || unkIdx < unknowns.Count)
 		{
-			Log.LogInformation($"Processing segment {segment.MarkerName} at offset {segment.Offset}");
-			var node = SegmentNode.FromSegment(segment, reader.ExifData, reader.ExifSegmentOffset);
-			TreeNodes.Add(node);
+			bool useSegment;
+			if (segIdx >= segments.Count)
+				useSegment = false;
+			else if (unkIdx >= unknowns.Count)
+				useSegment = true;
+			else
+				useSegment = segments[segIdx].Offset <= unknowns[unkIdx].Offset;
+
+			if (useSegment)
+			{
+				var segment = segments[segIdx++];
+				Log.LogInformation($"Processing segment {segment.MarkerName} at offset {segment.Offset}");
+				var node = SegmentNode.FromSegment(segment, reader.ExifData, reader.ExifSegmentOffset,
+					reader.ThumbnailSegments);
+				TreeNodes.Add(node);
+			}
+			else
+			{
+				var unknown = unknowns[unkIdx++];
+				Log.LogInformation($"Processing unknown data at offset {unknown.Offset}");
+				var node = new UnknownDataSegmentNode(unknown);
+				TreeNodes.Add(node);
+			}
 		}
 	}
 }
