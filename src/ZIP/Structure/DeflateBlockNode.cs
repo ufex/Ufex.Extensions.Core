@@ -52,13 +52,16 @@ public class DeflateBlockNode : TreeNode
 			for (int i = entry.Value.len - 1; i >= 0; i--)
 			{
 				int bit = (entry.Value.code >> i) & 1;
-				while (current.Children.Count < 2) current.Children.Add(new TreeDiagramVisual.Node(current.Children.Count.ToString()));
+				while (current.Children.Count <= bit)
+				{
+					current.Children.Add(new TreeDiagramVisual.Node(current.Children.Count.ToString()));
+				}
 				current = current.Children[bit];
 			}
 			string hex = $"0x{entry.Key:X2}";
 			string ascii = (entry.Key >= 32 && entry.Key <= 126) ? $" '{(char)entry.Key}'" : "";
 			current.Label = $"{hex}{ascii}";
-			current.Children = null;
+			current.Children.Clear();
 		}
 		return root;
 	}

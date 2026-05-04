@@ -7,13 +7,16 @@ A collection of C# plugin projects for [Ufex](https://github.com/ufex) (Universa
 | Project | Format(s) | Description |
 |---------|-----------|-------------|
 | **BMP** | BMP, ICO, CUR | Windows Bitmap and Icon/Cursor files. Parses file headers, info headers (V3/V4/V5), color tables, and pixel data. |
+| **EXIF** | N/A | Shared code for processing EXIF metadata. |
 | **GIF** | GIF87a, GIF89a | GIF images and animations. Extracts frame data, global/local color tables, extension blocks (application, comment, NETSCAPE looping). |
 | **GZIP** | GZIP | GZIP compressed archives. Parses member headers and compressed data blocks. |
 | **INI** | INI | INI configuration files. Parses sections, properties, comments, and detects encoding/BOM. |
+| **ISOBMFF** | ISOBMFF, MP4, MOV, HEIF, 3GP | ISO Base Media File Format (e.g., MP4, MOV). Parses box/atom hierarchy, headers, and metadata. |
 | **JPEG** | JPEG, JFIF | JPEG/JFIF images. Parses marker segments (SOI, SOF, SOS, APP0, COM, etc.), JFIF metadata, chroma subsampling, and quantization tables. |
+| **OPC** | OPC, docx, pptx, xlsx | Open Packaging Conventions (e.g., Office Open XML). Parses package structure, relationships, and part contents. |
 | **PDF** | PDF | Portable Document Format. Parses headers, indirect objects, cross-reference tables/streams, trailers, and document metadata (title, author, etc.). |
 | **PNG** | PNG | PNG images. Parses chunks (IHDR, IDAT, IEND, tEXt, pHYs, gAMA, tIME, etc.), extracts pixel format, gamma, and embedded text metadata. |
-| **RIFF** | AVI, WAV | RIFF container format. Parses the chunk hierarchy including LIST and RIFF form types. Handles AVI video and WAV audio files. |
+| **RIFF** | AVI, WAV, WebP | RIFF container format. Parses the chunk hierarchy including LIST and RIFF form types. Handles AVI video and WAV audio files. |
 | **ZIP** | ZIP | ZIP archives. Parses local file headers, central directory records, end of central directory, and reports compression methods. |
 
 ## Project Structure
